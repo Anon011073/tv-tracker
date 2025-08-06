@@ -255,6 +255,10 @@ nav a:hover {
   text-decoration: none;
 }
 .genreselect { margin-top: 20px;}
+
+.day-container {
+  margin-bottom: 2rem;
+}
 /**** Light Theme Styles ***/
 body.dark-mode {
   background-color: #0e1217;
