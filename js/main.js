@@ -55,10 +55,6 @@ function loadTrackedShows() {
   });
 }
 
-function loadGenreShows(genreId) {
-  loadShows(`/discover/tv&with_genres=${genreId}`, 'genreSection');
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   loadTrackedShows?.();
   loadShows('/tv/popular', 'popular', 16);
