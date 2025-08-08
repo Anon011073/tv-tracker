@@ -29,34 +29,39 @@ if (empty($username) || empty($password)) {
     exit;
 }
 
-$conn = getDbConnection();
+try {
+    $conn = getDbConnection();
 
-$stmt = $conn->prepare("SELECT id, username, password FROM users WHERE username = ?");
-$stmt->bind_param("s", $username);
-$stmt->execute();
-$result = $stmt->get_result();
+    $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-if ($result->num_rows === 0) {
-    http_response_code(401);
-    echo json_encode(['message' => 'Invalid username or password.']);
+    if ($result->num_rows === 0) {
+        http_response_code(401);
+        echo json_encode(['message' => 'Invalid username or password.']);
+        $stmt->close();
+        $conn->close();
+        exit;
+    }
+
+    $user = $result->fetch_assoc();
+
+    if (password_verify($password, $user['password'])) {
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['username'] = $user['username'];
+        http_response_code(200);
+        echo json_encode(['message' => 'Login successful.']);
+    } else {
+        http_response_code(401);
+        echo json_encode(['message' => 'Invalid username or password.']);
+    }
+
     $stmt->close();
     $conn->close();
-    exit;
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['message' => 'A server error occurred. Please try again later.']);
 }
-
-$user = $result->fetch_assoc();
-
-if (password_verify($password, $user['password'])) {
-    $_SESSION['user_id'] = $user['id'];
-    $_SESSION['username'] = $user['username'];
-    http_response_code(200);
-    echo json_encode(['message' => 'Login successful.']);
-} else {
-    http_response_code(401);
-    echo json_encode(['message' => 'Invalid username or password.']);
-}
-
-$stmt->close();
-$conn->close();
 
 ?>
