@@ -14,6 +14,7 @@
   <a href="calendar.html">📅 Calendar</a>
   <a href="favourites.html">⭐ Favourites</a>
   <a href="watchlist.html">📋 Watchlist</a>
+  <div id="user-nav"></div>
 </nav>
 
 <main>
@@ -26,8 +27,14 @@
     <a href="index.html">🏠 Back to Home</a>
   </p>
 </footer>
+<script src="js/main.js"></script>
 <script src="js/theme.js"></script>
 <script src="js/calendar.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    updateNav();
+  });
+</script>
 <a href="#top" class="back-to-top">Back to Top</a>
 </body>
 </html>

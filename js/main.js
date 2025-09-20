@@ -56,6 +56,7 @@ function loadTrackedShows() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  updateNav();
   loadTrackedShows?.();
   loadShows('/tv/popular', 'popular', 16);
   loadShows('/tv/top_rated', 'topRated', 16);
@@ -63,14 +64,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const genreSelect = document.getElementById('genreSelect');
   if (genreSelect) {
-    const savedGenre = localStorage.getItem('selectedGenre') || '80';
-    genreSelect.value = savedGenre;
-    loadGenreShows(savedGenre);
+    fetch('api/preferences.php?action=get')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          genreSelect.value = data.preferences.genre;
+          loadGenreShows(data.preferences.genre);
+        }
+      });
 
-    genreSelect.addEventListener('change', () => {
+    genreSelect.addEventListener('change', async () => {
       const genreId = genreSelect.value;
-      localStorage.setItem('selectedGenre', genreId);
       loadGenreShows(genreId);
+
+      const formData = new FormData();
+      formData.append('action', 'set');
+      formData.append('genre', genreId);
+
+      await fetch('api/preferences.php', {
+        method: 'POST',
+        body: formData
+      });
     });
   }
 });
@@ -124,17 +138,21 @@ function renderMovies(movies, containerId) {
   });
 }
 
+
 async function watchMovie(tmdbId, title) {
   const res = await fetch(`https://api.themoviedb.org/3/movie/${tmdbId}/external_ids?api_key=b6b677eb7d4ec17f700e3d4dfc31d005`);
   const data = await res.json();
   const imdbId = data.imdb_id;
   if (!imdbId) return alert('No IMDb ID found.');
 
-  const watched = JSON.parse(localStorage.getItem('watchedMovies') || '[]');
-  if (!watched.find(m => m.id === tmdbId)) {
-    watched.push({ id: tmdbId, title });
-    localStorage.setItem('watchedMovies', JSON.stringify(watched));
-  }
+  const formData = new FormData();
+  formData.append('action', 'add');
+  formData.append('tmdb_id', tmdbId);
+
+  await fetch('api/watch_history.php', {
+    method: 'POST',
+    body: formData
+  });
 
   window.open(`se_player.php?video_id=${imdbId}`, '_blank');
 }
@@ -146,4 +164,40 @@ if (searchInput) {
     clearTimeout(window.searchTimeout);
     window.searchTimeout = setTimeout(searchShows, 400);
   });
+}
+
+async function updateNav() {
+    const userNav = document.getElementById('user-nav');
+    if (!userNav) return;
+
+    const response = await fetch('api/session.php');
+    const session = await response.json();
+
+    if (session.loggedIn) {
+        userNav.innerHTML = `
+            <span>Welcome, ${session.username}</span>
+            <a href="#" id="logoutBtn">Logout</a>
+        `;
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+    } else {
+        userNav.innerHTML = `
+            <a href="login.html">Login</a>
+            <a href="register.html">Register</a>
+        `;
+    }
+}
+
+async function logout() {
+    const response = await fetch('api/auth.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'action=logout'
+    });
+
+    const result = await response.json();
+    if (result.success) {
+        window.location.href = 'index.html';
+    }
 }
