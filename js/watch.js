@@ -34,10 +34,8 @@ async function loadMovie(id) {
 }
 
 async function loadEpisodes(id) {
-  const resumeResponse = await fetch(`api/watch_history.php?action=get_resume&tmdb_id=${id}`);
-  const resumeData = await resumeResponse.json();
-  const last = resumeData.success ? resumeData.resume : null;
-
+  const stored = JSON.parse(localStorage.getItem('resumeEpisodes') || '{}');
+  const last = stored[id];
   const response = await fetch(`https://api.themoviedb.org/3/tv/${id}?api_key=${TMDB_KEY}`);
   const show = await response.json();
 
@@ -68,20 +66,11 @@ async function loadEpisodes(id) {
       const epDiv = document.createElement('div');
       epDiv.className = 'episode';
       epDiv.textContent = `S${season}E${episode.episode_number}: ${episode.name}`;
-      epDiv.onclick = async () => {
+      epDiv.onclick = () => {
         iframe.src = `se_player.php?video_id=${imdbId}&s=${season}&e=${episode.episode_number}`;
         movieTitle.textContent = `${show.name} - S${season}E${episode.episode_number}`;
-
-        const formData = new FormData();
-        formData.append('action', 'update_resume');
-        formData.append('tmdb_id', id);
-        formData.append('season', season);
-        formData.append('episode', episode.episode_number);
-
-        await fetch('api/watch_history.php', {
-          method: 'POST',
-          body: formData
-        });
+        stored[id] = { s: season, e: episode.episode_number };
+        localStorage.setItem('resumeEpisodes', JSON.stringify(stored));
       };
 
       // auto-load last watched or first episode
@@ -98,36 +87,14 @@ async function loadEpisodes(id) {
 }
 
 // Theme toggle
-document.addEventListener('DOMContentLoaded', () => {
-  setupTheme();
-});
-
-function setupTheme() {
-  const toggleBtn = document.getElementById('themeToggle');
-
-  fetch('api/preferences.php?action=get')
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        document.body.classList.add(data.preferences.theme + '-mode');
-      }
-    });
-
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', async () => {
-      const isDark = document.body.classList.contains('dark-mode');
-      const newTheme = isDark ? 'light' : 'dark';
-      document.body.classList.remove(isDark ? 'dark-mode' : 'light-mode');
-      document.body.classList.add(newTheme + '-mode');
-
-      const formData = new FormData();
-      formData.append('action', 'set');
-      formData.append('theme', newTheme);
-
-      await fetch('api/preferences.php', {
-        method: 'POST',
-        body: formData
-      });
-    });
-  }
+const toggleBtn = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('theme') || 'dark';
+document.body.classList.add(savedTheme + '-mode');
+if (toggleBtn) {
+  toggleBtn.addEventListener('click', () => {
+    const isDark = document.body.classList.contains('dark-mode');
+    document.body.classList.remove(isDark ? 'dark-mode' : 'light-mode');
+    document.body.classList.add(isDark ? 'light-mode' : 'dark-mode');
+    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  });
 }

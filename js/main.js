@@ -29,36 +29,26 @@ function loadShows(endpoint, containerId, limit = 16) {
     .catch(err => console.error('Error loading shows:', err));
 }
 
-// Load tracked shows from the database
-async function loadTrackedShows() {
+// Load tracked shows from localStorage
+function loadTrackedShows() {
+  const tracked = JSON.parse(localStorage.getItem('favs') || '[]');
   const container = document.getElementById('trackedShows');
-  if (!container) return;
-
-  const response = await fetch('api/favorites.php?action=list');
-  const data = await response.json();
-
-  if (!data.success || data.favorites.length === 0) {
-    container.innerHTML = '<p>You have no favorite shows yet.</p>';
-    return;
-  }
-
+  if (!container || !tracked.length) return;
   container.innerHTML = '';
-  data.favorites.slice(0, 16).forEach(fav => {
-    // We only want to display TV shows in this section
-    if (fav.type !== 'tv') return;
 
-    fetch(`api/tmdb.php?endpoint=/tv/${fav.tmdb_id}`)
+  tracked.slice(0, 16).forEach(show => {
+    fetch(`api/tmdb.php?endpoint=/tv/${show.id}`)
       .then(res => res.json())
-      .then(showData => {
+      .then(data => {
         const div = document.createElement('div');
         div.className = 'card';
         div.innerHTML = `
-          <img src="https://image.tmdb.org/t/p/w200${showData.poster_path}" alt="${showData.name}" />
-          <h3>${showData.name}</h3>
-          <p>⭐ ${showData.vote_average}</p>
+          <img src="https://image.tmdb.org/t/p/w200${data.poster_path}" alt="${data.name}" />
+          <h3>${data.name}</h3>
+          <p>⭐ ${data.vote_average}</p>
         `;
         div.addEventListener('click', () => {
-          window.location.href = `show.html?id=${showData.id}`;
+          window.location.href = `show.html?id=${data.id}`;
         });
         container.appendChild(div);
       });
@@ -66,7 +56,6 @@ async function loadTrackedShows() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  updateNav();
   loadTrackedShows?.();
   loadShows('/tv/popular', 'popular', 16);
   loadShows('/tv/top_rated', 'topRated', 16);
@@ -74,27 +63,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const genreSelect = document.getElementById('genreSelect');
   if (genreSelect) {
-    fetch('api/preferences.php?action=get')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          genreSelect.value = data.preferences.genre;
-          loadGenreShows(data.preferences.genre);
-        }
-      });
+    const savedGenre = localStorage.getItem('selectedGenre') || '80';
+    genreSelect.value = savedGenre;
+    loadGenreShows(savedGenre);
 
-    genreSelect.addEventListener('change', async () => {
+    genreSelect.addEventListener('change', () => {
       const genreId = genreSelect.value;
+      localStorage.setItem('selectedGenre', genreId);
       loadGenreShows(genreId);
-
-      const formData = new FormData();
-      formData.append('action', 'set');
-      formData.append('genre', genreId);
-
-      await fetch('api/preferences.php', {
-        method: 'POST',
-        body: formData
-      });
     });
   }
 });
@@ -148,66 +124,47 @@ function renderMovies(movies, containerId) {
   });
 }
 
-
 async function watchMovie(tmdbId, title) {
   const res = await fetch(`https://api.themoviedb.org/3/movie/${tmdbId}/external_ids?api_key=b6b677eb7d4ec17f700e3d4dfc31d005`);
   const data = await res.json();
   const imdbId = data.imdb_id;
   if (!imdbId) return alert('No IMDb ID found.');
 
-  const formData = new FormData();
-  formData.append('action', 'add');
-  formData.append('tmdb_id', tmdbId);
-
-  await fetch('api/watch_history.php', {
-    method: 'POST',
-    body: formData
-  });
+  const watched = JSON.parse(localStorage.getItem('watchedMovies') || '[]');
+  if (!watched.find(m => m.id === tmdbId)) {
+    watched.push({ id: tmdbId, title });
+    localStorage.setItem('watchedMovies', JSON.stringify(watched));
+  }
 
   window.open(`se_player.php?video_id=${imdbId}`, '_blank');
 }
 
 // Listen for input in search bar
-const searchInput = document.getElementById('searchInput');
-if (searchInput) {
-  searchInput.addEventListener('input', () => {
-    clearTimeout(window.searchTimeout);
-    window.searchTimeout = setTimeout(searchShows, 400);
-  });
-}
-
-async function updateNav() {
-    const userNav = document.getElementById('user-nav');
-    if (!userNav) return;
-
-    const response = await fetch('api/session.php');
-    const session = await response.json();
-
-    if (session.loggedIn) {
-        userNav.innerHTML = `
-            <span>Welcome, ${session.username}</span>
-            <a href="#" id="logoutBtn">Logout</a>
-        `;
-        document.getElementById('logoutBtn').addEventListener('click', logout);
-    } else {
-        userNav.innerHTML = `
-            <a href="login.html">Login</a>
-            <a href="register.html">Register</a>
-        `;
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            clearTimeout(window.searchTimeout);
+            window.searchTimeout = setTimeout(searchShows, 400);
+        });
     }
-}
 
-async function logout() {
-    const response = await fetch('api/auth.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'action=logout'
-    });
+    const backToTopButton = document.getElementById('back-to-top');
+    if (backToTopButton) {
+        window.onscroll = function() {
+            if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+                backToTopButton.style.display = "block";
+            } else {
+                backToTopButton.style.display = "none";
+            }
+        };
 
-    const result = await response.json();
-    if (result.success) {
-        window.location.href = 'index.html';
+        backToTopButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
     }
-}
+});

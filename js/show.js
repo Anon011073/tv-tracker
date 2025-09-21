@@ -9,30 +9,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function setupTheme() {
   const toggleBtn = document.getElementById('themeToggle');
-
-  fetch('api/preferences.php?action=get')
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        document.body.classList.add(data.preferences.theme + '-mode');
-      }
-    });
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  document.body.classList.add(savedTheme + '-mode');
 
   if (toggleBtn) {
-    toggleBtn.addEventListener('click', async () => {
+    toggleBtn.addEventListener('click', () => {
       const isDark = document.body.classList.contains('dark-mode');
-      const newTheme = isDark ? 'light' : 'dark';
       document.body.classList.remove(isDark ? 'dark-mode' : 'light-mode');
-      document.body.classList.add(newTheme + '-mode');
-
-      const formData = new FormData();
-      formData.append('action', 'set');
-      formData.append('theme', newTheme);
-
-      await fetch('api/preferences.php', {
-        method: 'POST',
-        body: formData
-      });
+      document.body.classList.add(isDark ? 'light-mode' : 'dark-mode');
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
     });
   }
 }
@@ -50,6 +35,7 @@ function fetchShowDetails(id) {
 
 function renderShowDetails(show) {
   const container = document.getElementById('showDetails');
+  const caughtUpDate = getCaughtUp(show.id) || 'Not set';
 
   container.innerHTML = `
     <section class="hero">
@@ -66,6 +52,7 @@ function renderShowDetails(show) {
           <button id="resetBtn" class="btn btn-danger">🗑️ Reset Progress</button>
           <a class="btn btn-primary" href="watch.html?id=${show.id}" target="_blank">▶️ Watch Now</a>
         </div>
+        <p><em>Last watched air date: ${caughtUpDate}</em></p>
       </div>
     </section>
 
@@ -76,38 +63,9 @@ function renderShowDetails(show) {
   `;
 
   const favBtn = document.getElementById('favBtn');
-  // We need to check if the user is logged in before we can check for favorites
-  fetch('api/session.php')
-    .then(res => res.json())
-    .then(session => {
-      if (session.loggedIn) {
-        fetch('api/favorites.php?action=list')
-          .then(res => {
-            if (!res.ok) {
-              throw new Error(`HTTP error! status: ${res.status}`);
-            }
-            return res.json();
-          })
-          .then(data => {
-            if (data.success) {
-              const isFav = data.favorites.some(f => f.tmdb_id === show.id);
-              favBtn.textContent = isFav ? '❌ Remove from Favourites' : '❤️ Add to Favourites';
-              favBtn.addEventListener('click', () => toggleFavourite(show.id, show.name, show.poster_path, isFav));
-            } else {
-              favBtn.textContent = 'Error';
-            }
-          })
-          .catch(error => {
-            console.error('Error fetching favorites:', error);
-            favBtn.textContent = 'Error';
-          });
-      } else {
-        favBtn.textContent = '❤️ Add to Favourites';
-        favBtn.addEventListener('click', () => {
-          window.location.href = 'login.html';
-        });
-      }
-    });
+  const isFav = (JSON.parse(localStorage.getItem('favs') || '[]')).some(f => f.id === show.id);
+  favBtn.textContent = isFav ? '❌ Remove from Favourites' : '❤️ Add to Favourites';
+  favBtn.addEventListener('click', () => toggleFavourite(show.id, show.name));
   document.getElementById('caughtUpBtn').addEventListener('click', () => markCaughtUp(show.id));
   document.getElementById('resetBtn').addEventListener('click', () => resetProgress(show.id));
 
@@ -166,9 +124,9 @@ function loadRecommendations(id) {
     });
 }
 
-async function renderEpisodes(showId, seasonNumber, episodes) {
+function renderEpisodes(showId, seasonNumber, episodes) {
   const container = document.getElementById('episodes');
-  const progress = await getWatchProgress(showId);
+  const progress = getWatchProgress(showId);
   const seasonId = `season-${showId}-${seasonNumber}`;
 
   let html = `
@@ -177,13 +135,13 @@ async function renderEpisodes(showId, seasonNumber, episodes) {
       <div id="${seasonId}" class="season-body" style="display:none;">
   `;
 
-  episodes.forEach(ep => {
-    const watched = progress[seasonNumber]?.[ep.episode_number] ?? false;
+  episodes.forEach((ep, idx) => {
+    const watched = progress[seasonNumber]?.[idx] ?? false;
     html += `
       <div class="episode-row">
-        <input type="checkbox" id="ep-${seasonNumber}-${ep.episode_number}" ${watched ? 'checked' : ''}
-          onchange="markEpisode(${showId}, ${seasonNumber}, ${ep.episode_number}, this.checked)">
-        <label for="ep-${seasonNumber}-${ep.episode_number}">S${seasonNumber}E${ep.episode_number}: ${ep.name}</label>
+        <input type="checkbox" id="ep-${seasonNumber}-${idx}" ${watched ? 'checked' : ''}
+          onchange="markEpisode(${showId}, ${seasonNumber}, ${idx}, this.checked)">
+        <label for="ep-${seasonNumber}-${idx}">S${seasonNumber}E${ep.episode_number}: ${ep.name}</label>
       </div>
     `;
   });
@@ -192,124 +150,88 @@ async function renderEpisodes(showId, seasonNumber, episodes) {
   container.innerHTML += html;
 }
 
-async function toggleFavourite(id, name, poster_path, isFav) {
+function toggleFavourite(id, name) {
+  let favs = JSON.parse(localStorage.getItem('favs') || '[]');
+  const isFav = favs.some(s => s.id === id);
   const btn = document.getElementById('favBtn');
-  const action = isFav ? 'remove' : 'add';
 
-  const formData = new FormData();
-  formData.append('action', action);
-  formData.append('tmdb_id', id);
-  formData.append('type', 'tv');
-  formData.append('title', name);
-  formData.append('poster_path', poster_path);
-
-  try {
-    const response = await fetch('api/favorites.php', {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
-    alert(result.message);
-
-    if (result.success) {
-      if (isFav) {
-        btn.textContent = '❤️ Add to Favourites';
-      } else {
-        btn.textContent = '❌ Remove from Favourites';
-      }
-      location.reload();
-    }
-  } catch (error) {
-    console.error('Error toggling favorite:', error);
-    alert('An error occurred. Please try again.');
+  if (isFav) {
+    favs = favs.filter(s => s.id !== id);
+    alert(`Removed ${name} from favourites`);
+    if (btn) btn.textContent = '❤️ Add to Favourites';
+  } else {
+    favs.push({ id, name });
+    alert(`Added ${name} to favourites`);
+    if (btn) btn.textContent = '❌ Remove from Favourites';
   }
+
+  localStorage.setItem('favs', JSON.stringify(favs));
 }
 
-async function markCaughtUp(showId) {
-  const response = await fetch(`api/tmdb.php?endpoint=/tv/${showId}`);
-  const show = await response.json();
-  const totalSeasons = show.number_of_seasons;
-  const promises = [];
+function markCaughtUp(showId) {
+  fetch(`api/tmdb.php?endpoint=/tv/${showId}`)
+    .then(res => res.json())
+    .then(show => {
+      const latestDate = show.last_episode_to_air?.air_date;
+      if (!latestDate) return alert('Could not determine last air date.');
 
-  for (let s = 1; s <= totalSeasons; s++) {
-    const seasonResponse = await fetch(`api/tmdb.php?endpoint=/tv/${showId}/season/${s}`);
-    const seasonData = await seasonResponse.json();
-    seasonData.episodes.forEach(episode => {
-      const formData = new FormData();
-      formData.append('action', 'add');
-      formData.append('tmdb_id', showId);
-      formData.append('season', s);
-      formData.append('episode', episode.episode_number);
-      promises.push(
-        fetch('api/watch_history.php', {
-          method: 'POST',
-          body: formData
-        })
-      );
+      const totalSeasons = show.number_of_seasons;
+      const promises = [];
+
+      for (let s = 1; s <= totalSeasons; s++) {
+        promises.push(fetch(`api/tmdb.php?endpoint=/tv/${showId}/season/${s}`).then(r => r.json()));
+      }
+
+      Promise.all(promises).then(seasons => {
+        const all = JSON.parse(localStorage.getItem('watchProgress') || '{}');
+        all[showId] = all[showId] || {};
+
+        seasons.forEach(season => {
+          const seasonNum = season.season_number;
+          all[showId][seasonNum] = season.episodes.map(() => true);
+        });
+
+        localStorage.setItem('watchProgress', JSON.stringify(all));
+
+        const caughtUp = JSON.parse(localStorage.getItem('caughtUp') || '{}');
+        caughtUp[showId] = latestDate;
+        localStorage.setItem('caughtUp', JSON.stringify(caughtUp));
+
+        alert(`Marked all episodes watched and caught up to ${latestDate}`);
+        location.reload();
+      });
     });
-  }
+}
 
-  await Promise.all(promises);
-  alert('Marked all episodes as watched.');
+function resetProgress(showId) {
+  const all = JSON.parse(localStorage.getItem('watchProgress') || '{}');
+  delete all[showId];
+  localStorage.setItem('watchProgress', JSON.stringify(all));
+
+  const caughtUp = JSON.parse(localStorage.getItem('caughtUp') || '{}');
+  delete caughtUp[showId];
+  localStorage.setItem('caughtUp', JSON.stringify(caughtUp));
+
+  alert('Watch progress has been reset for this show.');
   location.reload();
 }
 
-async function resetProgress(showId) {
-  const formData = new FormData();
-  formData.append('action', 'reset');
-  formData.append('tmdb_id', showId);
-
-  const response = await fetch('api/watch_history.php', {
-    method: 'POST',
-    body: formData
-  });
-
-  const result = await response.json();
-  alert(result.message);
-
-  if (result.success) {
-    location.reload();
-  }
+function getCaughtUp(showId) {
+  const all = JSON.parse(localStorage.getItem('caughtUp') || '{}');
+  return all[showId];
 }
 
-
-async function getWatchProgress(showId) {
-  const response = await fetch(`api/watch_history.php?action=get&tmdb_id=${showId}`);
-  const data = await response.json();
-  if (data.success) {
-    const progress = {};
-    data.history.forEach(item => {
-      if (!progress[item.season]) {
-        progress[item.season] = {};
-      }
-      progress[item.season][item.episode] = true;
-    });
-    return progress;
-  }
-  return {};
+function getWatchProgress(showId) {
+  const all = JSON.parse(localStorage.getItem('watchProgress') || '{}');
+  return all[showId] || {};
 }
 
-async function markEpisode(showId, season, episode, checked) {
-  const formData = new FormData();
-  formData.append('action', checked ? 'add' : 'remove_episode'); // 'remove_episode' is not implemented yet, but this is how it would work
-  formData.append('tmdb_id', showId);
-  formData.append('season', season);
-  formData.append('episode', episode);
-
-  const response = await fetch('api/watch_history.php', {
-    method: 'POST',
-    body: formData
-  });
-
-  const result = await response.json();
-  if (!result.success) {
-    alert(result.message);
-  }
+function markEpisode(showId, season, index, checked) {
+  const all = JSON.parse(localStorage.getItem('watchProgress') || '{}');
+  all[showId] = all[showId] || {};
+  all[showId][season] = all[showId][season] || [];
+  all[showId][season][index] = checked;
+  localStorage.setItem('watchProgress', JSON.stringify(all));
 }
 
 function toggleSeason(id) {

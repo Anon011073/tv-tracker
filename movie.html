@@ -1,23 +1,27 @@
 <!-- File: movie.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <title>Movie Details</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
   <link rel="stylesheet" href="css/style.css">
   <script src="js/movie.js" defer></script>
 </head>
 <body>
-  <nav>
-    <button id="themeToggle" class="theme-toggle">🌙 Toggle Theme</button>
-    <a href="index.html">🏠 Home</a>
-    <a href="calendar.html">📅 Calendar</a>
-    <a href="profile.html">👤 Profile</a>
-    <a href="watchlist.html">📋 Watchlist</a>
-    <a href="movies.html">🎬 Movies</a>
-  </nav>
+<nav class="container-fluid">
+  <ul>
+    <li><a href="./" class="brand">📺 TV Tracker</a></li>
+  </ul>
+  <input type="search" id="searchInput" name="search" placeholder="Search">
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="watchlist.html">Watchlist</a></li>
+    <li><a href="calendar.html">Calendar</a></li>
+  </ul>
+</nav>
 
-  <main id="movieDetails">
+  <main id="movieDetails" class="container">
     <!-- Movie details will load here -->
   </main>
 

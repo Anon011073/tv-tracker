@@ -38,49 +38,24 @@ async function watchMovie(tmdbId, title) {
   const imdbId = data.imdb_id;
   if (!imdbId) return alert('No IMDb ID found.');
 
-  const formData = new FormData();
-  formData.append('action', 'add');
-  formData.append('tmdb_id', tmdbId);
-
-  await fetch('api/watch_history.php', {
-    method: 'POST',
-    body: formData
-  });
+  const watched = JSON.parse(localStorage.getItem('watchedMovies') || '[]');
+  if (!watched.find(m => m.id === tmdbId)) {
+    watched.push({ id: tmdbId, title });
+    localStorage.setItem('watchedMovies', JSON.stringify(watched));
+  }
 
   window.location.href = `watch.html?id=${tmdbId}&type=movie`;
 }
 
 // Theme toggle
-document.addEventListener('DOMContentLoaded', () => {
-  setupTheme();
-});
-
-function setupTheme() {
-  const toggleBtn = document.getElementById('themeToggle');
-
-  fetch('api/preferences.php?action=get')
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        document.body.classList.add(data.preferences.theme + '-mode');
-      }
-    });
-
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', async () => {
-      const isDark = document.body.classList.contains('dark-mode');
-      const newTheme = isDark ? 'light' : 'dark';
-      document.body.classList.remove(isDark ? 'dark-mode' : 'light-mode');
-      document.body.classList.add(newTheme + '-mode');
-
-      const formData = new FormData();
-      formData.append('action', 'set');
-      formData.append('theme', newTheme);
-
-      await fetch('api/preferences.php', {
-        method: 'POST',
-        body: formData
-      });
-    });
-  }
+const toggleBtn = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('theme') || 'dark';
+document.body.classList.add(savedTheme + '-mode');
+if (toggleBtn) {
+  toggleBtn.addEventListener('click', () => {
+    const isDark = document.body.classList.contains('dark-mode');
+    document.body.classList.remove(isDark ? 'dark-mode' : 'light-mode');
+    document.body.classList.add(isDark ? 'light-mode' : 'dark-mode');
+    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  });
 }

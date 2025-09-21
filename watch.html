@@ -1,22 +1,25 @@
 <!-- File: watch.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <title>Watch</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <nav>
-    <button id="themeToggle" class="theme-toggle">🌙 Toggle Theme</button>
-    <a href="index.html">🏠 Home</a>
-    <a href="calendar.html">📅 Calendar</a>
-    <a href="profile.html">👤 Profile</a>
-    <a href="watchlist.html">📋 Watchlist</a>
-    <a href="movies.html">🎬 Movies</a>
-  </nav>
+<nav class="container-fluid">
+  <ul>
+    <li><a href="./" class="brand">📺 TV Tracker</a></li>
+  </ul>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="watchlist.html">Watchlist</a></li>
+    <li><a href="calendar.html">Calendar</a></li>
+  </ul>
+</nav>
 
-  <div id="videoPlayer">
+  <div id="videoPlayer" class="container">
     <h2>Now Playing: <span id="movieTitle">Loading...</span></h2>
     <iframe id="iframe" scrolling="no" src="" allowfullscreen></iframe>
     <p style="color: rgb(79, 221, 221); font-weight: 500;">If there's an error or buffering, refresh or try a different source.</p>

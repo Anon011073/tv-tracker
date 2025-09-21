@@ -1,23 +1,27 @@
 <!-- File: calendar.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <title>📆 TV Tracker – Calendar</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
-<nav>
-  <button id="themeToggle" class="theme-toggle">🌙 Toggle Theme</button>
-  <a href="index.html">🏠 Home</a>
-  <a href="calendar.html">📅 Calendar</a>
-  <a href="profile.html">👤 Profile</a>
-  <a href="watchlist.html">📋 Watchlist</a>
-  <div id="user-nav"></div>
+<nav class="container-fluid">
+  <ul>
+    <li><a href="./" class="brand">📺 TV Tracker</a></li>
+  </ul>
+  <input type="search" id="searchInput" name="search" placeholder="Search">
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="watchlist.html">Watchlist</a></li>
+    <li><a href="calendar.html">Calendar</a></li>
+  </ul>
 </nav>
 
-<main>
+<main class="container">
   <div id="calendarContainer"></div>
 </main>
 <footer class="site-footer">
@@ -27,14 +31,8 @@
     <a href="index.html">🏠 Back to Home</a>
   </p>
 </footer>
-<script src="js/main.js"></script>
 <script src="js/theme.js"></script>
 <script src="js/calendar.js"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    updateNav();
-  });
-</script>
 <a href="#top" class="back-to-top">Back to Top</a>
 </body>
 </html>
