@@ -29,26 +29,36 @@ function loadShows(endpoint, containerId, limit = 16) {
     .catch(err => console.error('Error loading shows:', err));
 }
 
-// Load tracked shows from localStorage
-function loadTrackedShows() {
-  const tracked = JSON.parse(localStorage.getItem('favs') || '[]');
+// Load tracked shows from the database
+async function loadTrackedShows() {
   const container = document.getElementById('trackedShows');
-  if (!container || !tracked.length) return;
-  container.innerHTML = '';
+  if (!container) return;
 
-  tracked.slice(0, 16).forEach(show => {
-    fetch(`api/tmdb.php?endpoint=/tv/${show.id}`)
+  const response = await fetch('api/favorites.php?action=list');
+  const data = await response.json();
+
+  if (!data.success || data.favorites.length === 0) {
+    container.innerHTML = '<p>You have no favorite shows yet.</p>';
+    return;
+  }
+
+  container.innerHTML = '';
+  data.favorites.slice(0, 16).forEach(fav => {
+    // We only want to display TV shows in this section
+    if (fav.type !== 'tv') return;
+
+    fetch(`api/tmdb.php?endpoint=/tv/${fav.tmdb_id}`)
       .then(res => res.json())
-      .then(data => {
+      .then(showData => {
         const div = document.createElement('div');
         div.className = 'card';
         div.innerHTML = `
-          <img src="https://image.tmdb.org/t/p/w200${data.poster_path}" alt="${data.name}" />
-          <h3>${data.name}</h3>
-          <p>⭐ ${data.vote_average}</p>
+          <img src="https://image.tmdb.org/t/p/w200${showData.poster_path}" alt="${showData.name}" />
+          <h3>${showData.name}</h3>
+          <p>⭐ ${showData.vote_average}</p>
         `;
         div.addEventListener('click', () => {
-          window.location.href = `show.html?id=${data.id}`;
+          window.location.href = `show.html?id=${showData.id}`;
         });
         container.appendChild(div);
       });
