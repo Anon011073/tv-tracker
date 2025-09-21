@@ -19,7 +19,7 @@
 define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
 define('DB_USER', getenv('DB_USER') ?: 'root');
 define('DB_PASS', getenv('DB_PASS') ?: 'password');
-define('DB_NAME', getenv('DB_NAME') ?: 'movie_app');
+define('DB_NAME', 'tvtracker');
 
 // TMDB API Key
 define('TMDB_API_KEY', getenv('TMDB_API_KEY') ?: 'b6b677eb7d4ec17f700e3d4dfc31d005');
