@@ -41,14 +41,31 @@ if ($action == 'get') {
 
     if ($stmt->num_rows > 0) {
         // Update existing preferences
+        $query = "UPDATE user_preferences SET";
+        $params = [];
+        $types = "";
+
         if ($theme !== null) {
-            $stmt = $conn->prepare("UPDATE user_preferences SET theme = ? WHERE user_id = ?");
-            $stmt->bind_param("si", $theme, $user_id);
+            $query .= " theme = ?,";
+            $params[] = $theme;
+            $types .= "s";
         }
         if ($genre !== null) {
-            $stmt = $conn->prepare("UPDATE user_preferences SET genre = ? WHERE user_id = ?");
-            $stmt->bind_param("si", $genre, $user_id);
+            $query .= " genre = ?,";
+            $params[] = $genre;
+            $types .= "s";
         }
+
+        // Remove trailing comma
+        $query = rtrim($query, ',');
+
+        $query .= " WHERE user_id = ?";
+        $params[] = $user_id;
+        $types .= "i";
+
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param($types, ...$params);
+
     } else {
         // Insert new preferences
         $stmt = $conn->prepare("INSERT INTO user_preferences (user_id, theme, genre) VALUES (?, ?, ?)");

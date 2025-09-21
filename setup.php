@@ -64,6 +64,7 @@ $sql_user_preferences = "CREATE TABLE IF NOT EXISTS user_preferences (
     id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT(6) UNSIGNED NOT NULL,
     theme VARCHAR(10) DEFAULT 'dark',
+    genre VARCHAR(10) DEFAULT '80',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 )";
 
