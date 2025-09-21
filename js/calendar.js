@@ -42,58 +42,30 @@ function renderCalendar(episodes) {
     eventsByDate[ep.air_date].push(ep);
   });
 
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
+  // Sort dates
+  const sortedDates = Object.keys(eventsByDate).sort();
 
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-  const numDays = lastDay.getDate();
-  const startDay = (firstDay.getDay() + 6) % 7; // Make Monday = 0
+  let html = '<h2>Upcoming Episodes</h2>';
 
-  const monthName = firstDay.toLocaleString('default', { month: 'long' });
+  sortedDates.forEach(dateStr => {
+    const eps = eventsByDate[dateStr];
+    const date = new Date(dateStr + 'T00:00:00'); // Ensure correct date parsing
+    const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+    const monthDay = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
 
-  // Start building calendar HTML
-  let html = `<h2>${monthName} ${year}</h2>`;
-  html += '<div class="calendar-grid-view">';
-
-  // Add weekday headers
-  const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  weekdays.forEach(day => {
-    html += `<div class="calendar-header">${day}</div>`;
-  });
-
-  // Empty cells before 1st
-  for (let i = 0; i < startDay; i++) {
-    html += `<div class="calendar-day empty"></div>`;
-  }
-
-  // Render each day
-  for (let d = 1; d <= numDays; d++) {
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    const eps = eventsByDate[dateStr] || [];
-
-    let inner = `<strong>${d}</strong>`;
+    let inner = `<h3>${dayName}, ${monthDay}</h3>`;
     eps.forEach(ep => {
       inner += `
-        <div class="ep-tile">
+        <p>
           <a href="show.html?id=${ep.showId}">
-            ${ep.name}<br><small>${ep.episode}</small>
+            <strong>${ep.name}</strong><br>
+            <small>${ep.episode}</small>
           </a>
-        </div>
+        </p>
       `;
     });
+    html += `<div class="calendar-day">${inner}</div>`;
+  });
 
-    html += `<div class="calendar-day ${eps.length ? 'has-ep' : ''}">${inner}</div>`;
-  }
-
-  // Fill trailing empty days to complete grid
-  const totalCells = startDay + numDays;
-  const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
-  for (let i = 0; i < remaining; i++) {
-    html += `<div class="calendar-day empty"></div>`;
-  }
-
-  html += '</div>';
   container.innerHTML = html;
 }
