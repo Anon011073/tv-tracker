@@ -108,11 +108,6 @@ nav ul li {
   }
 }
 
-#showDetails .grid {
-    grid-template-columns: 300px 1fr;
-    gap: 2rem;
-}
-
 /* Calendar */
 #calendarContainer {
   display: grid;

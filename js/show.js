@@ -8,8 +8,18 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupTheme() {
-  // Theme is set by default in the HTML, this function is no longer needed
-  // but we keep it to avoid breaking other parts of the code that call it.
+  const toggleBtn = document.getElementById('themeToggle');
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  document.body.classList.add(savedTheme + '-mode');
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      const isDark = document.body.classList.contains('dark-mode');
+      document.body.classList.remove(isDark ? 'dark-mode' : 'light-mode');
+      document.body.classList.add(isDark ? 'light-mode' : 'dark-mode');
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    });
+  }
 }
 
 function fetchShowDetails(id) {
@@ -25,25 +35,26 @@ function fetchShowDetails(id) {
 
 function renderShowDetails(show) {
   const container = document.getElementById('showDetails');
+  const caughtUpDate = getCaughtUp(show.id) || 'Not set';
 
   container.innerHTML = `
-    <div class="grid">
-      <div class="poster-container">
-        <img src="https://image.tmdb.org/t/p/w300${show.poster_path}" alt="${show.name}" class="poster" />
-      </div>
+    <section class="hero">
+      <img src="https://image.tmdb.org/t/p/w300${show.poster_path}" alt="${show.name}" class="poster" />
       <div class="hero-text">
         <h1>${show.name}</h1>
+        <p>${show.overview}</p>
         <p><strong>Status:</strong> ${show.status}</p>
         <p><strong>Seasons:</strong> ${show.number_of_seasons}</p>
-        <p>${show.overview}</p>
-        <div class="grid">
-            <button id="favBtn">❤️ Add to Favourites</button>
-            <a role="button" href="watch.html?id=${show.id}" target="_blank">▶️ Watch Now</a>
+
+        <div class="btn-group">
+          <button id="favBtn" class="btn">❤️ Loading...</button>
+          <button id="caughtUpBtn" class="btn btn-secondary">✅ Mark as Caught Up</button>
+          <button id="resetBtn" class="btn btn-danger">🗑️ Reset Progress</button>
+          <a class="btn btn-primary" href="watch.html?id=${show.id}" target="_blank">▶️ Watch Now</a>
         </div>
-        <button id="caughtUpBtn" class="secondary">✅ Mark as Caught Up</button>
-        <button id="resetBtn" class="contrast">🗑️ Reset Progress</button>
+        <p><em>Last watched air date: ${caughtUpDate}</em></p>
       </div>
-    </div>
+    </section>
 
     <section id="cast"></section>
     <section id="reviews"></section>
@@ -51,11 +62,12 @@ function renderShowDetails(show) {
     <section id="episodes"></section>
   `;
 
-  // Note: The backend is broken, so the button functionality is left as-is for visual review.
   const favBtn = document.getElementById('favBtn');
-  favBtn.addEventListener('click', () => alert('This functionality is under development.'));
-  document.getElementById('caughtUpBtn').addEventListener('click', () => alert('This functionality is under development.'));
-  document.getElementById('resetBtn').addEventListener('click', () => alert('This functionality is under development.'));
+  const isFav = (JSON.parse(localStorage.getItem('favs') || '[]')).some(f => f.id === show.id);
+  favBtn.textContent = isFav ? '❌ Remove from Favourites' : '❤️ Add to Favourites';
+  favBtn.addEventListener('click', () => toggleFavourite(show.id, show.name));
+  document.getElementById('caughtUpBtn').addEventListener('click', () => markCaughtUp(show.id));
+  document.getElementById('resetBtn').addEventListener('click', () => resetProgress(show.id));
 
   for (let season = 1; season <= show.number_of_seasons; season++) {
     fetch(`api/tmdb.php?endpoint=/tv/${show.id}/season/${season}`)
@@ -101,10 +113,10 @@ function loadRecommendations(id) {
       const recDiv = document.getElementById('recommendations');
       if (data.results.length > 0) {
         recDiv.innerHTML = '<h3>🔁 Recommendations</h3>' +
-          '<div class="grid">' +
+          '<div class="recommendation-grid">' +
           data.results.slice(0, 6).map(show => `
-            <div class="card" onclick="window.location.href='show.html?id=${show.id}'" style="cursor: pointer;">
-              <img src="https://image.tmdb.org/t/p/w200${show.poster_path}" alt="${show.name}" />
+            <div class="rec-card" onclick="window.location.href='show.html?id=${show.id}'">
+              <img src="https://image.tmdb.org/t/p/w154${show.poster_path}" alt="${show.name}" />
               <h4>${show.name}</h4>
             </div>
           `).join('') + '</div>';
@@ -138,14 +150,88 @@ function renderEpisodes(showId, seasonNumber, episodes) {
   container.innerHTML += html;
 }
 
+function toggleFavourite(id, name) {
+  let favs = JSON.parse(localStorage.getItem('favs') || '[]');
+  const isFav = favs.some(s => s.id === id);
+  const btn = document.getElementById('favBtn');
+
+  if (isFav) {
+    favs = favs.filter(s => s.id !== id);
+    alert(`Removed ${name} from favourites`);
+    if (btn) btn.textContent = '❤️ Add to Favourites';
+  } else {
+    favs.push({ id, name });
+    alert(`Added ${name} to favourites`);
+    if (btn) btn.textContent = '❌ Remove from Favourites';
+  }
+
+  localStorage.setItem('favs', JSON.stringify(favs));
+}
+
+function markCaughtUp(showId) {
+  fetch(`api/tmdb.php?endpoint=/tv/${showId}`)
+    .then(res => res.json())
+    .then(show => {
+      const latestDate = show.last_episode_to_air?.air_date;
+      if (!latestDate) return alert('Could not determine last air date.');
+
+      const totalSeasons = show.number_of_seasons;
+      const promises = [];
+
+      for (let s = 1; s <= totalSeasons; s++) {
+        promises.push(fetch(`api/tmdb.php?endpoint=/tv/${showId}/season/${s}`).then(r => r.json()));
+      }
+
+      Promise.all(promises).then(seasons => {
+        const all = JSON.parse(localStorage.getItem('watchProgress') || '{}');
+        all[showId] = all[showId] || {};
+
+        seasons.forEach(season => {
+          const seasonNum = season.season_number;
+          all[showId][seasonNum] = season.episodes.map(() => true);
+        });
+
+        localStorage.setItem('watchProgress', JSON.stringify(all));
+
+        const caughtUp = JSON.parse(localStorage.getItem('caughtUp') || '{}');
+        caughtUp[showId] = latestDate;
+        localStorage.setItem('caughtUp', JSON.stringify(caughtUp));
+
+        alert(`Marked all episodes watched and caught up to ${latestDate}`);
+        location.reload();
+      });
+    });
+}
+
+function resetProgress(showId) {
+  const all = JSON.parse(localStorage.getItem('watchProgress') || '{}');
+  delete all[showId];
+  localStorage.setItem('watchProgress', JSON.stringify(all));
+
+  const caughtUp = JSON.parse(localStorage.getItem('caughtUp') || '{}');
+  delete caughtUp[showId];
+  localStorage.setItem('caughtUp', JSON.stringify(caughtUp));
+
+  alert('Watch progress has been reset for this show.');
+  location.reload();
+}
+
+function getCaughtUp(showId) {
+  const all = JSON.parse(localStorage.getItem('caughtUp') || '{}');
+  return all[showId];
+}
+
 function getWatchProgress(showId) {
-  // Dummy function for visual review
-  return {};
+  const all = JSON.parse(localStorage.getItem('watchProgress') || '{}');
+  return all[showId] || {};
 }
 
 function markEpisode(showId, season, index, checked) {
-    // Dummy function for visual review
-    console.log(`Marking episode: ${showId}, S${season}E${index}, Watched: ${checked}`);
+  const all = JSON.parse(localStorage.getItem('watchProgress') || '{}');
+  all[showId] = all[showId] || {};
+  all[showId][season] = all[showId][season] || [];
+  all[showId][season][index] = checked;
+  localStorage.setItem('watchProgress', JSON.stringify(all));
 }
 
 function toggleSeason(id) {
