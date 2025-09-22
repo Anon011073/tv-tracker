@@ -55,6 +55,10 @@ function loadTrackedShows() {
   });
 }
 
+function loadGenreShows(genreId) {
+    loadShows(`/discover/tv?with_genres=${genreId}`, 'genreSection');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   loadTrackedShows?.();
   loadShows('/tv/popular', 'popular', 16);
@@ -72,6 +76,33 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('selectedGenre', genreId);
       loadGenreShows(genreId);
     });
+  }
+
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) {
+      searchInput.addEventListener('input', () => {
+          clearTimeout(window.searchTimeout);
+          window.searchTimeout = setTimeout(searchShows, 400);
+      });
+  }
+
+  const backToTopButton = document.getElementById('back-to-top');
+  if (backToTopButton) {
+      window.onscroll = function() {
+          if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+              backToTopButton.style.display = "block";
+          } else {
+              backToTopButton.style.display = "none";
+          }
+      };
+
+      backToTopButton.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+          });
+      });
   }
 });
 
@@ -138,33 +169,3 @@ async function watchMovie(tmdbId, title) {
 
   window.open(`se_player.php?video_id=${imdbId}`, '_blank');
 }
-
-// Listen for input in search bar
-document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', () => {
-            clearTimeout(window.searchTimeout);
-            window.searchTimeout = setTimeout(searchShows, 400);
-        });
-    }
-
-    const backToTopButton = document.getElementById('back-to-top');
-    if (backToTopButton) {
-        window.onscroll = function() {
-            if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
-                backToTopButton.style.display = "block";
-            } else {
-                backToTopButton.style.display = "none";
-            }
-        };
-
-        backToTopButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
-    }
-});

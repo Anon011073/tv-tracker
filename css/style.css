@@ -11,9 +11,9 @@
   --h5-color: #f0f0f0;
   --h6-color: #f0f0f0;
   --muted-color: #888;
-  --primary: #546e7a;
-  --primary-hover: #627f8c;
-  --primary-focus: rgba(84, 110, 122, 0.25);
+  --primary: #333;
+  --primary-hover: #444;
+  --primary-focus: rgba(51, 51, 51, 0.25);
   --primary-inverse: #fff;
 }
 
@@ -77,6 +77,11 @@ nav ul li {
   margin: 0;
 }
 
+.card:hover {
+  cursor: pointer;
+  border: 1px solid var(--primary);
+}
+
 /* Back to top button */
 .back-to-top {
   position: fixed;
@@ -88,7 +93,7 @@ nav ul li {
   background-color: var(--primary);
   color: var(--primary-inverse);
   text-decoration: none;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   line-height: 3rem;
   text-align: center;
   z-index: 1000;
@@ -101,6 +106,11 @@ nav ul li {
   .container {
     max-width: 98%;
   }
+}
+
+#showDetails .grid {
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
 }
 
 /* Calendar */
