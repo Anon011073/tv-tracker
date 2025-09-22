@@ -30,18 +30,18 @@ function renderShowDetails(show) {
     <div class="grid">
       <div class="poster-container">
         <img src="https://image.tmdb.org/t/p/w300${show.poster_path}" alt="${show.name}" class="poster" />
-        <div class="grid">
-            <button id="favBtn">❤️ Add to Favourites</button>
-            <a role="button" href="watch.html?id=${show.id}" target="_blank">▶️ Watch Now</a>
-        </div>
-        <button id="caughtUpBtn" class="secondary">✅ Mark as Caught Up</button>
-        <button id="resetBtn" class="contrast">🗑️ Reset Progress</button>
       </div>
       <div class="hero-text">
         <h1>${show.name}</h1>
         <p><strong>Status:</strong> ${show.status}</p>
         <p><strong>Seasons:</strong> ${show.number_of_seasons}</p>
         <p>${show.overview}</p>
+        <div class="grid">
+            <button id="favBtn">❤️ Add to Favourites</button>
+            <a role="button" href="watch.html?id=${show.id}" target="_blank">▶️ Watch Now</a>
+        </div>
+        <button id="caughtUpBtn" class="secondary">✅ Mark as Caught Up</button>
+        <button id="resetBtn" class="contrast">🗑️ Reset Progress</button>
       </div>
     </div>
 
