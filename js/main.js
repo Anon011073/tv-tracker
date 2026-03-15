@@ -76,7 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function loadGenreShows(genreId) {
-  loadShows(`/discover/tv?with_genres=${genreId}`, 'genreSection');
+  // Use & because endpoint is already a query param in the proxy URL
+  loadShows(`/discover/tv&with_genres=${genreId}`, 'genreSection');
 }
 
 function searchShows() {
