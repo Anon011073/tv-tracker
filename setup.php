@@ -19,6 +19,7 @@ try {
         password TEXT
     )");
 
+    echo "✅ SQLite Database initialized. (Note: SQLite uses a file instead of a MySQL server, so no phpMyAdmin setup is required).<br>";
     echo "✅ Table 'users' created successfully.<br>";
 
     // Insert default admin user

@@ -18,17 +18,24 @@ To get the TV Tracker script running on your server, follow these steps:
 - PHP 7.4 or higher.
 - SQLite3 PHP extension enabled.
 
-### 2. Database Initialization
-This script uses SQLite for simplicity. You can automatically set up the database by navigating to the `setup.php` file in your browser:
+### 2. Database Initialization (No phpMyAdmin Needed)
+**Important:** This script uses **SQLite**, not MySQL.
+
+**What this means for you:**
+- You **do not** need to create a database in phpMyAdmin or cPanel.
+- You **do not** need a database username or password for the server.
+- The entire database is stored in a single file: `api/users.db`.
+
+To set everything up, simply navigate to the `setup.php` file in your browser:
 
 `http://your-domain.com/setup.php`
 
 This will:
-- Create the `api/users.db` database file.
-- Set up the necessary tables.
-- Create a default admin account.
+- Automatically create the `api/users.db` file.
+- Set up the user tables.
+- Create the default admin account.
 
-**⚠️ Security Note:** After successfully running the setup, please delete the `setup.php` file from your server.
+**⚠️ Security Note:** After successfully running the setup and logging in, please delete the `setup.php` file from your server.
 
 ### 3. Default Login
 Once setup is complete, you can log in using the following credentials:
