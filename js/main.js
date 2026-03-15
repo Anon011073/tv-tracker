@@ -4,7 +4,9 @@ function renderShows(shows, containerId) {
   if (!container) return;
   container.innerHTML = '';
 
-  shows.slice(0, 16).forEach(show => {
+  // Limit shows for performance (e.g., 20 per section)
+  const limit = 20;
+  shows.slice(0, limit).forEach(show => {
     const div = document.createElement('div');
     div.className = 'card';
     div.innerHTML = `
@@ -17,6 +19,48 @@ function renderShows(shows, containerId) {
     });
     container.appendChild(div);
   });
+
+  addScrollArrows(container);
+}
+
+function addScrollArrows(container) {
+  // Check if arrows already exist in parent
+  const parent = container.parentElement;
+  if (!parent.classList.contains('section-container')) {
+    // Wrap container if not already wrapped
+    const wrapper = document.createElement('div');
+    wrapper.className = 'section-container';
+    parent.insertBefore(wrapper, container);
+    wrapper.appendChild(container);
+  }
+
+  const wrapper = container.parentElement;
+  if (wrapper.querySelector('.scroll-arrow')) return;
+
+  const leftArrow = document.createElement('button');
+  leftArrow.className = 'scroll-arrow arrow-left';
+  leftArrow.innerHTML = '❮';
+  leftArrow.onclick = () => container.scrollBy({ left: -400, behavior: 'smooth' });
+
+  const rightArrow = document.createElement('button');
+  rightArrow.className = 'scroll-arrow arrow-right';
+  rightArrow.innerHTML = '❯';
+  rightArrow.onclick = () => container.scrollBy({ left: 400, behavior: 'smooth' });
+
+  wrapper.appendChild(leftArrow);
+  wrapper.appendChild(rightArrow);
+
+  // Hide/show arrows based on scroll position
+  container.addEventListener('scroll', () => {
+    leftArrow.style.display = container.scrollLeft <= 0 ? 'none' : 'flex';
+    rightArrow.style.display = container.scrollLeft + container.clientWidth >= container.scrollWidth ? 'none' : 'flex';
+  });
+
+  // Initial check
+  setTimeout(() => {
+    leftArrow.style.display = 'none';
+    rightArrow.style.display = container.scrollWidth > container.clientWidth ? 'flex' : 'none';
+  }, 100);
 }
 
 // Updated searchShows function in main.js (unified TV + Movie)
@@ -36,22 +80,27 @@ function loadTrackedShows() {
   if (!container || !tracked.length) return;
   container.innerHTML = '';
 
-  tracked.slice(0, 16).forEach(show => {
-    fetch(`api/tmdb.php?endpoint=/tv/${show.id}`)
-      .then(res => res.json())
-      .then(data => {
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `
-          <img src="https://image.tmdb.org/t/p/w200${data.poster_path}" alt="${data.name}" />
-          <h3>${data.name}</h3>
-          <p>⭐ ${data.vote_average}</p>
-        `;
-        div.addEventListener('click', () => {
-          window.location.href = `show.php?id=${data.id}`;
-        });
-        container.appendChild(div);
+  // Limit to 40 tracked shows for performance
+  const limit = 40;
+  const promises = tracked.slice(0, limit).map(show =>
+    fetch(`api/tmdb.php?endpoint=/tv/${show.id}`).then(res => res.json())
+  );
+
+  Promise.all(promises).then(results => {
+    results.forEach(data => {
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.innerHTML = `
+        <img src="https://image.tmdb.org/t/p/w200${data.poster_path}" alt="${data.name}" />
+        <h3>${data.name}</h3>
+        <p>⭐ ${data.vote_average}</p>
+      `;
+      div.addEventListener('click', () => {
+        window.location.href = `show.php?id=${data.id}`;
       });
+      container.appendChild(div);
+    });
+    addScrollArrows(container);
   });
 }
 
