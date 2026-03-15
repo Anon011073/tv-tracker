@@ -58,9 +58,9 @@ function addScrollArrows(container) {
 
   // Initial check
   setTimeout(() => {
-    leftArrow.style.display = 'none';
+    leftArrow.style.display = container.scrollLeft <= 0 ? 'none' : 'flex';
     rightArrow.style.display = container.scrollWidth > container.clientWidth ? 'flex' : 'none';
-  }, 100);
+  }, 500); // Give more time for content to render
 }
 
 // Updated searchShows function in main.js (unified TV + Movie)
