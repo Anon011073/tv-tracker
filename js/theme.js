@@ -13,3 +13,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+// TV Tracker Theme Logic

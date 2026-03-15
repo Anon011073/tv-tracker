@@ -98,3 +98,4 @@ if (toggleBtn) {
     localStorage.setItem('theme', isDark ? 'light' : 'dark');
   });
 }
+// TV Tracker Watch Logic
