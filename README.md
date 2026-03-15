@@ -1,2 +1,55 @@
-# tv-tracker
-tracks tv series
+# 📺 TV Episode Tracker
+
+A web-based application to track your favorite TV series and movies using the TMDB API.
+
+## 🚀 Features
+- Track TV shows and movies.
+- Personalized watchlist and favourites.
+- Episode calendar.
+- Integrated video player.
+- **New:** Secure login and registration system.
+
+## 🛠️ Installation & Setup
+
+To get the TV Tracker script running on your server, follow these steps:
+
+### 1. Requirements
+- A web server (like Apache or Nginx).
+- PHP 7.4 or higher.
+- SQLite3 PHP extension enabled.
+
+### 2. Database Initialization
+This script uses SQLite for simplicity. You can automatically set up the database by navigating to the `setup.php` file in your browser:
+
+`http://your-domain.com/setup.php`
+
+This will:
+- Create the `api/users.db` database file.
+- Set up the necessary tables.
+- Create a default admin account.
+
+**⚠️ Security Note:** After successfully running the setup, please delete the `setup.php` file from your server.
+
+### 3. Default Login
+Once setup is complete, you can log in using the following credentials:
+- **Username:** `admin`
+- **Password:** `password123`
+
+You can also register a new account on the registration page.
+
+### 4. API Key
+The script currently uses a built-in TMDB API key. If you wish to use your own, you can update it in:
+- `api/tmdb.php`
+- `js/watch.js`
+- `js/movie.js`
+
+## 📂 Project Structure
+- `index.php`: Homepage with trending and popular shows.
+- `calendar.php`: Upcoming episodes for your tracked shows.
+- `login.php` / `register.php`: User authentication.
+- `api/`: PHP scripts for database connection and TMDB API proxy.
+- `js/`: Frontend logic for various pages.
+- `css/`: Application styles.
+
+---
+Built with ❤️ for TV lovers.
