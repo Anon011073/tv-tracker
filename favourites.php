@@ -18,8 +18,9 @@
   <h1>❤️ Your Favourites</h1>
   <div id="favouritesList"></div>
 
+  <script src="js/theme.js"></script>
   <script>
-    const favs = JSON.parse(localStorage.getItem('favs') || '[]');
+    const favs = JSON.parse(localStorage.getItem(getUserKey('favs')) || '[]');
     const container = document.getElementById('favouritesList');
 
     if (favs.length === 0) {
@@ -37,11 +38,10 @@
 
     function removeFav(id) {
       let updated = favs.filter(f => f.id !== id);
-      localStorage.setItem('favs', JSON.stringify(updated));
+      localStorage.setItem(getUserKey('favs'), JSON.stringify(updated));
       location.reload();
     }
   </script>
- <script src="js/theme.js"></script>
 <footer class="site-footer">
   <p>© 2025 TV Tracker — Built with ❤️ for your watchlist.</p>
   <p>

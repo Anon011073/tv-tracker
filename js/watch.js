@@ -1,5 +1,11 @@
 // File: js/watch.js
 
+// Helper to get user-specific localStorage key
+function getUserKey(key) {
+  const userId = window.CURRENT_USER_ID || 'guest';
+  return `user_${userId}_${key}`;
+}
+
 const TMDB_KEY = 'b6b677eb7d4ec17f700e3d4dfc31d005';
 const params = new URLSearchParams(window.location.search);
 const showId = params.get('id');
@@ -34,7 +40,7 @@ async function loadMovie(id) {
 }
 
 async function loadEpisodes(id) {
-  const stored = JSON.parse(localStorage.getItem('resumeEpisodes') || '{}');
+  const stored = JSON.parse(localStorage.getItem(getUserKey('resumeEpisodes')) || '{}');
   const last = stored[id];
   const response = await fetch(`https://api.themoviedb.org/3/tv/${id}?api_key=${TMDB_KEY}`);
   const show = await response.json();
@@ -70,7 +76,7 @@ async function loadEpisodes(id) {
         iframe.src = `se_player.php?video_id=${imdbId}&s=${season}&e=${episode.episode_number}`;
         movieTitle.textContent = `${show.name} - S${season}E${episode.episode_number}`;
         stored[id] = { s: season, e: episode.episode_number };
-        localStorage.setItem('resumeEpisodes', JSON.stringify(stored));
+        localStorage.setItem(getUserKey('resumeEpisodes'), JSON.stringify(stored));
       };
 
       // auto-load last watched or first episode
@@ -86,16 +92,4 @@ async function loadEpisodes(id) {
   }
 }
 
-// Theme toggle
-const toggleBtn = document.getElementById('themeToggle');
-const savedTheme = localStorage.getItem('theme') || 'dark';
-document.body.classList.add(savedTheme + '-mode');
-if (toggleBtn) {
-  toggleBtn.addEventListener('click', () => {
-    const isDark = document.body.classList.contains('dark-mode');
-    document.body.classList.remove(isDark ? 'dark-mode' : 'light-mode');
-    document.body.classList.add(isDark ? 'light-mode' : 'dark-mode');
-    localStorage.setItem('theme', isDark ? 'light' : 'dark');
-  });
-}
 // TV Tracker Watch Logic

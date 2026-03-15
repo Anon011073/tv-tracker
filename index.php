@@ -70,6 +70,7 @@
   <button onclick="importData()">⬆️ Import Tracker Data</button>
 </section>
   </main>
+  <script src="js/theme.js"></script>
   <script src="js/main.js"></script>
 <footer class="site-footer">
   <p>© 2025 TV Tracker — Built with ❤️ for your watchlist.</p>

@@ -1,3 +1,9 @@
+// Helper to get user-specific localStorage key
+function getUserKey(key) {
+  const userId = window.CURRENT_USER_ID || 'guest';
+  return `user_${userId}_${key}`;
+}
+
 // Restored + Updated renderShows function
 function renderShows(shows, containerId) {
   const container = document.getElementById(containerId);
@@ -132,7 +138,7 @@ function loadShows(endpoint, containerId, limit = 16) {
 
 // Load tracked shows from localStorage
 function loadTrackedShows() {
-  const tracked = JSON.parse(localStorage.getItem('favs') || '[]');
+  const tracked = JSON.parse(localStorage.getItem(getUserKey('favs')) || '[]');
   const container = document.getElementById('trackedShows');
   if (!container || !tracked.length) return;
   container.innerHTML = '';
@@ -169,13 +175,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const genreSelect = document.getElementById('genreSelect');
   if (genreSelect) {
-    const savedGenre = localStorage.getItem('selectedGenre') || '80';
+    const savedGenre = localStorage.getItem(getUserKey('selectedGenre')) || '80';
     genreSelect.value = savedGenre;
     loadGenreShows(savedGenre);
 
     genreSelect.addEventListener('change', () => {
       const genreId = genreSelect.value;
-      localStorage.setItem('selectedGenre', genreId);
+      localStorage.setItem(getUserKey('selectedGenre'), genreId);
       loadGenreShows(genreId);
     });
   }
@@ -242,10 +248,10 @@ async function watchMovie(tmdbId, title) {
   const imdbId = data.imdb_id;
   if (!imdbId) return alert('No IMDb ID found.');
 
-  const watched = JSON.parse(localStorage.getItem('watchedMovies') || '[]');
+  const watched = JSON.parse(localStorage.getItem(getUserKey('watchedMovies')) || '[]');
   if (!watched.find(m => m.id === tmdbId)) {
     watched.push({ id: tmdbId, title });
-    localStorage.setItem('watchedMovies', JSON.stringify(watched));
+    localStorage.setItem(getUserKey('watchedMovies'), JSON.stringify(watched));
   }
 
   window.open(`se_player.php?video_id=${imdbId}`, '_blank');
@@ -262,13 +268,13 @@ if (searchInput) {
 // Backup & Restore
 function exportData() {
   const data = {
-    favs: JSON.parse(localStorage.getItem('favs') || '[]'),
-    watchProgress: JSON.parse(localStorage.getItem('watchProgress') || '{}'),
-    watchedMovies: JSON.parse(localStorage.getItem('watchedMovies') || '[]'),
-    resumeEpisodes: JSON.parse(localStorage.getItem('resumeEpisodes') || '{}'),
-    caughtUp: JSON.parse(localStorage.getItem('caughtUp') || '{}'),
-    selectedGenre: localStorage.getItem('selectedGenre') || '80',
-    theme: localStorage.getItem('theme') || 'dark'
+    favs: JSON.parse(localStorage.getItem(getUserKey('favs')) || '[]'),
+    watchProgress: JSON.parse(localStorage.getItem(getUserKey('watchProgress')) || '{}'),
+    watchedMovies: JSON.parse(localStorage.getItem(getUserKey('watchedMovies')) || '[]'),
+    resumeEpisodes: JSON.parse(localStorage.getItem(getUserKey('resumeEpisodes')) || '{}'),
+    caughtUp: JSON.parse(localStorage.getItem(getUserKey('caughtUp')) || '{}'),
+    selectedGenre: localStorage.getItem(getUserKey('selectedGenre')) || '80',
+    theme: localStorage.getItem(getUserKey('theme')) || 'dark'
   };
   const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -286,7 +292,7 @@ function importData() {
   reader.onload = (e) => {
     const data = JSON.parse(e.target.result);
     Object.keys(data).forEach(key => {
-      localStorage.setItem(key, typeof data[key] === 'string' ? data[key] : JSON.stringify(data[key]));
+      localStorage.setItem(getUserKey(key), typeof data[key] === 'string' ? data[key] : JSON.stringify(data[key]));
     });
     alert('Data imported successfully! Reloading...');
     location.reload();

@@ -18,9 +18,10 @@
   <h1>📋 Unwatched Episodes</h1>
   <div id="watchList"></div>
 
+  <script src="js/theme.js"></script>
   <script>
-    const favs = JSON.parse(localStorage.getItem('favs') || '[]');
-    const progress = JSON.parse(localStorage.getItem('watchProgress') || '{}');
+    const favs = JSON.parse(localStorage.getItem(getUserKey('favs')) || '[]');
+    const progress = JSON.parse(localStorage.getItem(getUserKey('watchProgress')) || '{}');
     const container = document.getElementById('watchList');
 
     if (favs.length === 0) {

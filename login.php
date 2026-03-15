@@ -29,6 +29,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Please fill in all fields.";
     }
 }
+
+$success = '';
+if (isset($_GET['registered'])) {
+    $success = "Thanks for registering! Please log in.";
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -63,6 +68,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="dark-mode">
     <div class="auth-container">
         <h1>📺 Login</h1>
+        <?php if ($success): ?>
+            <p style="color: #2ecc71; margin-bottom: 10px;"><?php echo htmlspecialchars($success); ?></p>
+        <?php endif; ?>
         <?php if ($error): ?>
             <p class="error"><?php echo htmlspecialchars($error); ?></p>
         <?php endif; ?>

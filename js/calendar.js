@@ -1,9 +1,15 @@
+// Helper to get user-specific localStorage key
+function getUserKey(key) {
+  const userId = window.CURRENT_USER_ID || 'guest';
+  return `user_${userId}_${key}`;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   loadCalendar();
 });
 
 function loadCalendar() {
-  const favs = JSON.parse(localStorage.getItem('favs') || '[]');
+  const favs = JSON.parse(localStorage.getItem(getUserKey('favs')) || '[]');
   const container = document.getElementById('calendarContainer');
   container.innerHTML = '<p>📡 Loading upcoming episodes...</p>';
 
