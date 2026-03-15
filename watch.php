@@ -1,4 +1,4 @@
-<!-- File: watch.html -->
+<?php require_once 'auth_check.php'; ?><!-- File: watch.php -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,11 +9,12 @@
 <body>
   <nav>
     <button id="themeToggle" class="theme-toggle">🌙 Toggle Theme</button>
-    <a href="index.html">🏠 Home</a>
-    <a href="calendar.html">📅 Calendar</a>
-    <a href="favourites.html">⭐ Favourites</a>
-    <a href="watchlist.html">📋 Watchlist</a>
-    <a href="movies.html">🎬 Movies</a>
+    <a href="index.php">🏠 Home</a>
+    <a href="calendar.php">📅 Calendar</a>
+    <a href="favourites.php">⭐ Favourites</a>
+    <a href="watchlist.php">📋 Watchlist</a>
+    <a href="index.php">🎬 Movies</a>
+    <a href="logout.php">🚪 Logout</a>
   </nav>
 
   <div id="videoPlayer">

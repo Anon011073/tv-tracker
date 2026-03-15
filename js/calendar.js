@@ -77,7 +77,7 @@ function renderCalendar(episodes) {
     eps.forEach(ep => {
       inner += `
         <div class="ep-tile">
-          <a href="show.html?id=${ep.showId}">
+          <a href="show.php?id=${ep.showId}">
             ${ep.name}<br><small>${ep.episode}</small>
           </a>
         </div>

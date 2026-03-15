@@ -50,7 +50,7 @@ function renderShowDetails(show) {
           <button id="favBtn" class="btn">❤️ Loading...</button>
           <button id="caughtUpBtn" class="btn btn-secondary">✅ Mark as Caught Up</button>
           <button id="resetBtn" class="btn btn-danger">🗑️ Reset Progress</button>
-          <a class="btn btn-primary" href="watch.html?id=${show.id}" target="_blank">▶️ Watch Now</a>
+          <a class="btn btn-primary" href="watch.php?id=${show.id}" target="_blank">▶️ Watch Now</a>
         </div>
         <p><em>Last watched air date: ${caughtUpDate}</em></p>
       </div>
@@ -115,7 +115,7 @@ function loadRecommendations(id) {
         recDiv.innerHTML = '<h3>🔁 Recommendations</h3>' +
           '<div class="recommendation-grid">' +
           data.results.slice(0, 6).map(show => `
-            <div class="rec-card" onclick="window.location.href='show.html?id=${show.id}'">
+            <div class="rec-card" onclick="window.location.href='show.php?id=${show.id}'">
               <img src="https://image.tmdb.org/t/p/w154${show.poster_path}" alt="${show.name}" />
               <h4>${show.name}</h4>
             </div>

@@ -13,7 +13,7 @@ function renderShows(shows, containerId) {
       <p>⭐ ${show.vote_average}</p>
     `;
     div.addEventListener('click', () => {
-      window.location.href = `show.html?id=${show.id}`;
+      window.location.href = `show.php?id=${show.id}`;
     });
     container.appendChild(div);
   });
@@ -48,7 +48,7 @@ function loadTrackedShows() {
           <p>⭐ ${data.vote_average}</p>
         `;
         div.addEventListener('click', () => {
-          window.location.href = `show.html?id=${data.id}`;
+          window.location.href = `show.php?id=${data.id}`;
         });
         container.appendChild(div);
       });
@@ -74,6 +74,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+function loadGenreShows(genreId) {
+  // Use & because endpoint is already a query param in the proxy URL
+  loadShows(`/discover/tv&with_genres=${genreId}`, 'genreSection');
+}
 
 function searchShows() {
   const query = document.getElementById('searchInput').value.trim();
@@ -118,7 +123,7 @@ function renderMovies(movies, containerId) {
       <p>📅 ${movie.release_date || 'Unknown'}</p>
     `;
     div.addEventListener('click', () => {
-      window.location.href = `movie.html?id=${movie.id}`;
+      window.location.href = `movie.php?id=${movie.id}`;
     });
     container.appendChild(div);
   });
@@ -146,4 +151,38 @@ if (searchInput) {
     clearTimeout(window.searchTimeout);
     window.searchTimeout = setTimeout(searchShows, 400);
   });
+}
+// Backup & Restore
+function exportData() {
+  const data = {
+    favs: JSON.parse(localStorage.getItem('favs') || '[]'),
+    watchProgress: JSON.parse(localStorage.getItem('watchProgress') || '{}'),
+    watchedMovies: JSON.parse(localStorage.getItem('watchedMovies') || '[]'),
+    resumeEpisodes: JSON.parse(localStorage.getItem('resumeEpisodes') || '{}'),
+    caughtUp: JSON.parse(localStorage.getItem('caughtUp') || '{}'),
+    selectedGenre: localStorage.getItem('selectedGenre') || '80',
+    theme: localStorage.getItem('theme') || 'dark'
+  };
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'tv-tracker-backup.json';
+  a.click();
+}
+
+function importData() {
+  const fileInput = document.getElementById('importFile');
+  if (!fileInput.files.length) return alert('Please select a file first.');
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const data = JSON.parse(e.target.result);
+    Object.keys(data).forEach(key => {
+      localStorage.setItem(key, typeof data[key] === 'string' ? data[key] : JSON.stringify(data[key]));
+    });
+    alert('Data imported successfully! Reloading...');
+    location.reload();
+  };
+  reader.readAsText(fileInput.files[0]);
 }

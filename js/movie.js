@@ -44,7 +44,7 @@ async function watchMovie(tmdbId, title) {
     localStorage.setItem('watchedMovies', JSON.stringify(watched));
   }
 
-  window.location.href = `watch.html?id=${tmdbId}&type=movie`;
+  window.location.href = `watch.php?id=${tmdbId}&type=movie`;
 }
 
 // Theme toggle

@@ -12,5 +12,18 @@ $params['api_key'] = $apiKey;
 
 $fullUrl = $baseUrl . '?' . http_build_query($params);
 
-$response = file_get_contents($fullUrl);
-echo $response;
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $fullUrl);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+$response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+if ($httpCode !== 200) {
+    http_response_code($httpCode);
+    echo json_encode(['error' => 'Failed to fetch from TMDB', 'url' => $fullUrl]);
+} else {
+    echo $response;
+}

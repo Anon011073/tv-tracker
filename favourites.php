@@ -1,4 +1,4 @@
-<!-- File: favourites.html -->
+<?php require_once 'auth_check.php'; ?><!-- File: favourites.php -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,10 +9,11 @@
 <body>
 <nav>
   <button id="themeToggle" class="theme-toggle">🌙 Toggle Theme</button>
-  <a href="index.html">🏠 Home</a>
-  <a href="calendar.html">📅 Calendar</a>
-  <a href="favourites.html">⭐ Favourites</a>
-  <a href="watchlist.html">📋 Watchlist</a>
+  <a href="index.php">🏠 Home</a>
+  <a href="calendar.php">📅 Calendar</a>
+  <a href="favourites.php">⭐ Favourites</a>
+  <a href="watchlist.php">📋 Watchlist</a>
+    <a href="logout.php">🚪 Logout</a>
 </nav>
   <h1>❤️ Your Favourites</h1>
   <div id="favouritesList"></div>
@@ -28,7 +29,7 @@
         const div = document.createElement('div');
         div.innerHTML = `<h3>${fav.name}</h3>
           <button onclick="removeFav(${fav.id})">Remove</button>
-          <button onclick="location.href='show.html?id=${fav.id}'">Details</button>
+          <button onclick="location.href='show.php?id=${fav.id}'">Details</button>
         `;
         container.appendChild(div);
       });
@@ -44,8 +45,8 @@
 <footer class="site-footer">
   <p>© 2025 TV Tracker — Built with ❤️ for your watchlist.</p>
   <p>
-    <a href="calendar.html">📅 Episode Calendar</a> |
-    <a href="index.html">🏠 Back to Home</a>
+    <a href="calendar.php">📅 Episode Calendar</a> |
+    <a href="index.php">🏠 Back to Home</a>
   </p>
 </footer>
 <a href="#" class="back-to-top" title="Back to Top">⬆️ Top</a>
