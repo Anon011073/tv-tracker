@@ -1,4 +1,4 @@
-<!-- File: schedule.html -->
+<?php require_once 'auth_check.php'; ?><!-- File: schedule.php -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,10 +9,11 @@
 <body>
 <nav>
 <button id="themeToggle" class="theme-toggle">🌙 Toggle Theme</button>
-  <a href="index.html">🏠 Home</a>
-  <a href="schedule.html">📅 Schedule</a>
-  <a href="favourites.html">⭐ Favourites</a>
-  <a href="watchlist.html">📋 Watchlist</a>
+  <a href="index.php">🏠 Home</a>
+  <a href="schedule.php">📅 Schedule</a>
+  <a href="favourites.php">⭐ Favourites</a>
+  <a href="watchlist.php">📋 Watchlist</a>
+    <a href="logout.php">🚪 Logout</a>
 </nav>
   <h1>🗓️ Upcoming Episodes You're Not Caught Up On</h1>
   <div id="scheduleList"></div>
@@ -37,7 +38,7 @@
                 <h3>${show.name}</h3>
                 <p>Next: S${next.season_number}E${next.episode_number} - ${next.name}</p>
                 <p>Airs on: ${next.air_date}</p>
-                <a href="show.html?id=${show.id}">📄 View Show</a>
+                <a href="show.php?id=${show.id}">📄 View Show</a>
               `;
               container.appendChild(div);
             }

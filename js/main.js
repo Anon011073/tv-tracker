@@ -13,7 +13,7 @@ function renderShows(shows, containerId) {
       <p>⭐ ${show.vote_average}</p>
     `;
     div.addEventListener('click', () => {
-      window.location.href = `show.html?id=${show.id}`;
+      window.location.href = `show.php?id=${show.id}`;
     });
     container.appendChild(div);
   });
@@ -48,7 +48,7 @@ function loadTrackedShows() {
           <p>⭐ ${data.vote_average}</p>
         `;
         div.addEventListener('click', () => {
-          window.location.href = `show.html?id=${data.id}`;
+          window.location.href = `show.php?id=${data.id}`;
         });
         container.appendChild(div);
       });
@@ -118,7 +118,7 @@ function renderMovies(movies, containerId) {
       <p>📅 ${movie.release_date || 'Unknown'}</p>
     `;
     div.addEventListener('click', () => {
-      window.location.href = `movie.html?id=${movie.id}`;
+      window.location.href = `movie.php?id=${movie.id}`;
     });
     container.appendChild(div);
   });

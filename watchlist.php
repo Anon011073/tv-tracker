@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<?php require_once 'auth_check.php'; ?><!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -8,10 +8,11 @@
 <body>
 <nav>
   <button id="themeToggle" class="theme-toggle">🌙 Toggle Theme</button>
-  <a href="index.html">🏠 Home</a>
-  <a href="calendar.html">📅 Calendar</a>
-  <a href="favourites.html">⭐ Favourites</a>
-  <a href="watchlist.html">📋 Watchlist</a>
+  <a href="index.php">🏠 Home</a>
+  <a href="calendar.php">📅 Calendar</a>
+  <a href="favourites.php">⭐ Favourites</a>
+  <a href="watchlist.php">📋 Watchlist</a>
+    <a href="logout.php">🚪 Logout</a>
 </nav>
 
   <h1>📋 Unwatched Episodes</h1>
@@ -58,7 +59,7 @@ div.innerHTML = `
   <h3 onclick="toggleWatchlist('${bodyId}')">▶ ${show.name} (click to expand)</h3>
   <div class="watchlist-body" id="${bodyId}">
     <ul>${unwatched.map(e => `<li>${e}</li>`).join('')}</ul>
-    <a href="show.html?id=${show.id}">▶ Go to show</a>
+    <a href="show.php?id=${show.id}">▶ Go to show</a>
   </div>
 `;
 container.appendChild(div);

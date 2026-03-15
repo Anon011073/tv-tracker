@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<?php require_once 'auth_check.php'; ?><!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -8,11 +8,12 @@
 <body id="top">
   <nav>
     <button id="themeToggle" class="theme-toggle">🌙 Toggle Theme</button>
-    <a href="index.html">🏠 Home</a>
-    <a href="calendar.html">📅 Calendar</a>
-    <a href="favourites.html">⭐ Favourites</a>
-    <a href="watchlist.html">📋 Watchlist</a>
-    <a href="movies.html">🎬 Movies</a>
+    <a href="index.php">🏠 Home</a>
+    <a href="calendar.php">📅 Calendar</a>
+    <a href="favourites.php">⭐ Favourites</a>
+    <a href="watchlist.php">📋 Watchlist</a>
+    <a href="index.php">🎬 Movies</a>
+    <a href="logout.php">🚪 Logout</a>
   </nav>
   <header>
     <h1>📺 TV Episode Tracker</h1>
@@ -73,8 +74,8 @@
 <footer class="site-footer">
   <p>© 2025 TV Tracker — Built with ❤️ for your watchlist.</p>
   <p>
-    <a href="calendar.html">📅 Episode Calendar</a> |
-    <a href="index.html">🏠 Back to Home</a>
+    <a href="calendar.php">📅 Episode Calendar</a> |
+    <a href="index.php">🏠 Back to Home</a>
   </p>
 </footer>
 <a href="#top" class="back-to-top">Back to Top</a>
