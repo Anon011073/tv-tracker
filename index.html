@@ -67,6 +67,12 @@ margin-top:15px;
 .button:hover{
 background:#1d4ed8;
 }
+.screenshots{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-top:15px}
+.screenshots img{width:100%;height:auto;border-radius:8px;border:1px solid #1e293b;cursor:pointer;transition:transform .2s}
+.screenshots img:hover{transform:scale(1.03)}
+.lightbox{display:none;position:fixed;z-index:999;background:rgba(0,0,0,.9);top:0;left:0;width:100%;height:100%;align-items:center;justify-content:center}
+.lightbox img{max-width:90%;max-height:90%;border-radius:10px}
+.lightbox:active{display:none}
 </style>
 </head>
 <body>
@@ -75,9 +81,35 @@ background:#1d4ed8;
 <h1>TV Tracker</h1>
 <p>A self‑hosted TV series and movie tracker powered by the TMDB API.</p>
 <a class="button" href="#install">Installation Guide</a>
+<br><br>
+<a class="button" href="https://github.com/anon0110/tv-tracker" target="_blank">View Project on GitHub</a>
 </header>
 
 <div class="container">
+
+<div class="card">
+<h2>Project Repository</h2>
+<p>
+The full source code for TV Tracker is hosted on GitHub. You can download the latest version, report issues, or contribute to development.
+</p>
+<p>
+<strong>Repository:</strong><br>
+<code>https://github.com/anon0110/tv-tracker</code>
+</p>
+<p>
+Use the repository to download the project files or clone the project directly to your server.
+</p>
+
+<p>
+<a class="button" href="https://github.com/anon0110/tv-tracker/archive/refs/heads/main.zip">Download ZIP</a>
+</p>
+
+<h3>Quick Install (Git)</h3>
+<p>Clone the repository directly:</p>
+<p><code>git clone https://github.com/anon0110/tv-tracker.git</code></p>
+<p>Then upload the files to your server and run the installer.
+</p>
+</div>
 
 <div class="card">
 <h2>About</h2>
@@ -136,7 +168,36 @@ This project uses the TMDB API for TV and movie metadata. You will need to gener
 </p>
 </div>
 
+<div class="card">
+<h2>Screenshots</h2>
+<p>Preview of the TV Tracker interface.</p>
+<div class="screenshots">
+<img src="watch_screenshot.png" alt="Watch page screenshot">
+<img src="index_screenshot.png" alt="Homepage screenshot">
+<img src="details_screenshot.png" alt="Details page screenshot">
+<img src="calendar_screenshot.png" alt="Calendar screenshot">
 </div>
+</div>
+
+</div>
+
+</div>
+
+<div class="lightbox" id="lightbox" onclick="this.style.display='none'">
+<img id="lightbox-img" src="">
+</div>
+
+<script>
+const images=document.querySelectorAll('.screenshots img');
+const lightbox=document.getElementById('lightbox');
+const lightboxImg=document.getElementById('lightbox-img');
+images.forEach(img=>{
+img.addEventListener('click',()=>{
+lightbox.style.display='flex';
+lightboxImg.src=img.src;
+});
+});
+</script>
 
 <div class="footer">
 TV Tracker • Self Hosted TV & Movie Tracking
