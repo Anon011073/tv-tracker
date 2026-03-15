@@ -75,6 +75,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+function loadGenreShows(genreId) {
+  loadShows(`/discover/tv?with_genres=${genreId}`, 'genreSection');
+}
+
 function searchShows() {
   const query = document.getElementById('searchInput').value.trim();
   const searchSection = document.getElementById('searchSection');
