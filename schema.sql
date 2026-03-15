@@ -1,4 +1,8 @@
 -- Database Schema for TV Tracker
+-- IMPORTANT: This script is intended for an SQLite database.
+-- The application expects the database file to be named 'users.db'
+-- and located inside the 'api/' directory (api/users.db).
+
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE,
