@@ -180,6 +180,11 @@ nav a:hover {
   color: #ddd;
 }
 
+.card h3 {
+  font-size: 16px;
+  margin: 0.5rem 0 0;
+}
+
 .card:hover {
   transform: scale(1.05);
   background-color: #2a2a2a;
@@ -217,7 +222,7 @@ nav a:hover {
 .show-grid {
   display: flex;
   overflow-x: auto;
-  gap: 15px;
+  gap: 1.5rem;
   padding: 10px 5px;
   scrollbar-width: none; /* Hide scrollbar */
   scroll-behavior: smooth;
@@ -229,16 +234,12 @@ nav a:hover {
   display: none;
 }
 
-/* Two rows for Tracked Shows */
-#trackedShows {
-  display: grid;
-  grid-template-rows: repeat(2, auto);
-  grid-auto-flow: column;
-  grid-auto-columns: 200px; /* Maintain fixed width in grid */
-  gap: 15px;
-  overflow-x: auto;
-  flex-wrap: unset; /* Override flex if it was applied */
+.show-grid.active {
+  cursor: grabbing;
+  cursor: -webkit-grabbing;
+  user-select: none;
 }
+
 
 .section-container {
   position: relative;
@@ -249,7 +250,7 @@ nav a:hover {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(76, 201, 240, 0.8);
+  background: rgba(255, 153, 0, 0.8);
   color: white;
   border: none;
   width: 40px;
@@ -266,7 +267,7 @@ nav a:hover {
 }
 
 .scroll-arrow:hover {
-  background: rgba(59, 177, 219, 1);
+  background: rgba(255, 153, 0, 1);
 }
 
 .arrow-left {

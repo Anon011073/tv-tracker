@@ -61,6 +61,63 @@ function addScrollArrows(container) {
     leftArrow.style.display = container.scrollLeft <= 0 ? 'none' : 'flex';
     rightArrow.style.display = container.scrollWidth > container.clientWidth ? 'flex' : 'none';
   }, 500); // Give more time for content to render
+
+  enableDragToScroll(container);
+}
+
+function enableDragToScroll(slider) {
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+  let isDragging = false;
+
+  slider.addEventListener('mousedown', (e) => {
+    isDown = true;
+    isDragging = false;
+    slider.classList.add('active');
+    // Use clientX and getBoundingClientRect for more reliable positioning
+    startX = e.clientX - slider.getBoundingClientRect().left;
+    scrollLeft = slider.scrollLeft;
+    slider.style.scrollBehavior = 'auto';
+  });
+
+  slider.addEventListener('mouseleave', () => {
+    isDown = false;
+    slider.classList.remove('active');
+    slider.style.scrollBehavior = 'smooth';
+  });
+
+  slider.addEventListener('mouseup', (e) => {
+    isDown = false;
+    slider.classList.remove('active');
+    slider.style.scrollBehavior = 'smooth';
+
+    const x = e.clientX - slider.getBoundingClientRect().left;
+    if (Math.abs(x - startX) > 5) {
+      isDragging = true;
+    }
+  });
+
+  slider.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.clientX - slider.getBoundingClientRect().left;
+    const walk = (x - startX) * 2;
+    slider.scrollLeft = scrollLeft - walk;
+
+    if (Math.abs(x - startX) > 5) {
+      isDragging = true;
+    }
+  });
+
+  // Prevent clicks if we were dragging
+  slider.addEventListener('click', (e) => {
+    if (isDragging) {
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      isDragging = false; // Reset for next interaction
+    }
+  }, true);
 }
 
 // Updated searchShows function in main.js (unified TV + Movie)
@@ -80,8 +137,8 @@ function loadTrackedShows() {
   if (!container || !tracked.length) return;
   container.innerHTML = '';
 
-  // Limit to 40 tracked shows for performance
-  const limit = 40;
+  // Limit to 50 tracked shows for performance
+  const limit = 50;
   const promises = tracked.slice(0, limit).map(show =>
     fetch(`api/tmdb.php?endpoint=/tv/${show.id}`).then(res => res.json())
   );
@@ -176,6 +233,7 @@ function renderMovies(movies, containerId) {
     });
     container.appendChild(div);
   });
+  addScrollArrows(container);
 }
 
 async function watchMovie(tmdbId, title) {
