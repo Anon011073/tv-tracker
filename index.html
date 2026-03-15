@@ -1,82 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>TV Tracker - Home</title>
-  <link rel="stylesheet" href="css/style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TV Tracker</title>
+<style>
+body{
+font-family:Arial,Helvetica,sans-serif;
+margin:0;
+background:#0f172a;
+color:#e5e7eb;
+}
+header{
+background:#020617;
+padding:40px 20px;
+text-align:center;
+border-bottom:1px solid #1e293b;
+}
+header h1{
+margin:0;
+font-size:40px;
+}
+header p{
+color:#94a3b8;
+margin-top:10px;
+}
+.container{
+max-width:1000px;
+margin:auto;
+padding:40px 20px;
+}
+.card{
+background:#020617;
+padding:25px;
+margin-bottom:25px;
+border-radius:10px;
+border:1px solid #1e293b;
+}
+h2{
+margin-top:0;
+}
+ul{
+line-height:1.8;
+}
+code{
+background:#000;
+padding:4px 6px;
+border-radius:4px;
+color:#38bdf8;
+}
+.footer{
+text-align:center;
+padding:30px;
+color:#64748b;
+font-size:14px;
+}
+.button{
+display:inline-block;
+background:#2563eb;
+color:white;
+padding:12px 20px;
+border-radius:6px;
+text-decoration:none;
+margin-top:15px;
+}
+.button:hover{
+background:#1d4ed8;
+}
+</style>
 </head>
-<body id="top">
-  <nav>
-    <button id="themeToggle" class="theme-toggle">🌙 Toggle Theme</button>
-    <a href="index.html">🏠 Home</a>
-    <a href="calendar.html">📅 Calendar</a>
-    <a href="favourites.html">⭐ Favourites</a>
-    <a href="watchlist.html">📋 Watchlist</a>
-    <a href="movies.html">🎬 Movies</a>
-  </nav>
-  <header>
-    <h1>📺 TV Episode Tracker</h1>
-    <input type="text" id="searchInput" placeholder="Search shows..." />
-  </header>
-  <main>
-   
-<section id="searchSection" style="display: none;">
-  <h2>🔍 Search Results</h2>
-  <div id="searchResults" class="show-grid"></div>
-</section>
+<body>
 
-<section id="movieSection" style="display: none;">
-  <h2>🎬 Movie Results</h2>
-  <div id="movieResults" class="show-grid"></div>
-</section>
+<header>
+<h1>TV Tracker</h1>
+<p>A self‑hosted TV series and movie tracker powered by the TMDB API.</p>
+<a class="button" href="#install">Installation Guide</a>
+</header>
 
-<section>
-  <h2>🎯 Shows I Watch</h2>
-  <div id="trackedShows" class="show-grid"></div>
-</section>
-<section>
+<div class="container">
 
-<section>
-  <h2>🎯 Featured Genre</h2>
-  <label for="genreSelect">Choose a genre:</label>
-  <select id="genreSelect">
-    <option value="80">Crime</option>
-    <option value="9648">Mystery</option>
-    <option value="10765">Sci-Fi & Fantasy</option>
-    <option value="10759">Action & Adventure</option>
-    <option value="35">Comedy</option>
-    <option value="18">Drama</option>
-    <option value="16">Animation</option>
-    <option value="99">Documentary</option>
-  </select>
-  <div id="genreSection" class="show-grid genreselect"></div>
-</section>
-  <h2>📈 Trending Today</h2>
-  <div id="trending" class="show-grid"></div>
-</section>
-    <section>
-      <h2>🔥 Popular Shows</h2>
-      <div id="popular" class="show-grid"></div>
-    </section>
-    <section>
-      <h2>🏆 Top Rated Shows</h2>
-      <div id="topRated" class="show-grid"></div>
-    </section>
-<section>
-  <h2>🧩 Backup & Restore</h2>
-  <button onclick="exportData()">⬇️ Export Tracker Data</button>
-  <input type="file" id="importFile" accept=".json" />
-  <button onclick="importData()">⬆️ Import Tracker Data</button>
-</section>
-  </main>
-  <script src="js/main.js"></script>
-<footer class="site-footer">
-  <p>© 2025 TV Tracker — Built with ❤️ for your watchlist.</p>
-  <p>
-    <a href="calendar.html">📅 Episode Calendar</a> |
-    <a href="index.html">🏠 Back to Home</a>
-  </p>
-</footer>
-<a href="#top" class="back-to-top">Back to Top</a>
+<div class="card">
+<h2>About</h2>
+<p>
+TV Tracker is a lightweight web application that lets you track your favorite TV shows and movies using data from The Movie Database (TMDB).
+</p>
+<p>
+The app is designed to be simple, fast, and self‑hosted so you have full control over your watch history and data.
+</p>
+</div>
+
+<div class="card">
+<h2>Features</h2>
+<ul>
+<li>Track TV shows and movies</li>
+<li>Personal watchlist and favourites</li>
+<li>Episode release calendar</li>
+<li>Integrated video player</li>
+<li>Secure login and registration system</li>
+<li>Uses TMDB API for metadata</li>
+<li>Lightweight SQLite database</li>
+</ul>
+</div>
+
+<div class="card" id="install">
+<h2>Installation & Setup</h2>
+<p>TV Tracker includes an easy web‑based installer.</p>
+
+<h3>1. Requirements</h3>
+<ul>
+<li>Web server (Apache or Nginx)</li>
+<li>PHP 7.4+</li>
+<li>SQLite3 PHP extension enabled</li>
+</ul>
+
+<h3>2. Upload Files</h3>
+<p>
+Upload the project files to your web server directory.
+</p>
+
+<h3>3. Run Installer</h3>
+<p>
+Open your browser and navigate to:
+</p>
+<p><code>http://yourdomain.com/install.php</code></p>
+
+<p>
+Follow the setup steps to configure your database and TMDB API key.
+</p>
+</div>
+
+<div class="card">
+<h2>TMDB API</h2>
+<p>
+This project uses the TMDB API for TV and movie metadata. You will need to generate a free API key from TMDB and add it during installation.
+</p>
+</div>
+
+</div>
+
+<div class="footer">
+TV Tracker • Self Hosted TV & Movie Tracking
+</div>
+
 </body>
 </html>
