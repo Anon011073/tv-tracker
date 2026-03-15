@@ -151,3 +151,37 @@ if (searchInput) {
     window.searchTimeout = setTimeout(searchShows, 400);
   });
 }
+// Backup & Restore
+function exportData() {
+  const data = {
+    favs: JSON.parse(localStorage.getItem('favs') || '[]'),
+    watchProgress: JSON.parse(localStorage.getItem('watchProgress') || '{}'),
+    watchedMovies: JSON.parse(localStorage.getItem('watchedMovies') || '[]'),
+    resumeEpisodes: JSON.parse(localStorage.getItem('resumeEpisodes') || '{}'),
+    caughtUp: JSON.parse(localStorage.getItem('caughtUp') || '{}'),
+    selectedGenre: localStorage.getItem('selectedGenre') || '80',
+    theme: localStorage.getItem('theme') || 'dark'
+  };
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'tv-tracker-backup.json';
+  a.click();
+}
+
+function importData() {
+  const fileInput = document.getElementById('importFile');
+  if (!fileInput.files.length) return alert('Please select a file first.');
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const data = JSON.parse(e.target.result);
+    Object.keys(data).forEach(key => {
+      localStorage.setItem(key, typeof data[key] === 'string' ? data[key] : JSON.stringify(data[key]));
+    });
+    alert('Data imported successfully! Reloading...');
+    location.reload();
+  };
+  reader.readAsText(fileInput.files[0]);
+}
