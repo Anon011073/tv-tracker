@@ -77,6 +77,13 @@ function loadMainGrid(page = 1, shouldScroll = true) {
     endpoint += `&with_genres=${currentGenre}`;
   }
 
+  // Country filter
+  const countryOpts = document.querySelectorAll('.country-opt:checked');
+  if (countryOpts.length > 0) {
+      const countries = Array.from(countryOpts).map(opt => opt.value).join('|');
+      endpoint += `&with_origin_country=${countries}`;
+  }
+
   fetch(`api/tmdb.php?endpoint=${endpoint}`)
     .then(res => res.json())
     .then(data => {
@@ -171,16 +178,23 @@ document.addEventListener('DOMContentLoaded', () => {
   if (sortBy) {
     sortBy.addEventListener('change', (e) => {
       currentSort = e.target.value;
-      loadMainGrid(1);
+      loadMainGrid(1, false);
     });
   }
 
   const englishOnly = document.getElementById('englishOnly');
   if (englishOnly) {
       englishOnly.addEventListener('change', () => {
-          loadMainGrid(1);
+          loadMainGrid(1, false);
       });
   }
+
+  const countryOpts = document.querySelectorAll('.country-opt');
+  countryOpts.forEach(opt => {
+      opt.addEventListener('change', () => {
+          loadMainGrid(1, false);
+      });
+  });
 
   const genreItems = document.querySelectorAll('.genre-item');
   genreItems.forEach(item => {
@@ -188,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
       genreItems.forEach(i => i.classList.remove('active'));
       item.classList.add('active');
       currentGenre = item.dataset.id;
-      loadMainGrid(1);
+      loadMainGrid(1, false);
 
       const gridTitle = document.getElementById('gridTitle');
       if (gridTitle) {

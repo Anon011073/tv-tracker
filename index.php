@@ -44,6 +44,24 @@
     </div>
 
     <div class="sidebar-section">
+      <h3>Countries</h3>
+      <div class="country-filters" style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" class="country-opt" id="countryUS" value="US">
+          <label for="countryUS" style="cursor: pointer; font-size: 0.9rem; color: #a0a0a0;">🇺🇸 USA</label>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" class="country-opt" id="countryUK" value="GB">
+          <label for="countryUK" style="cursor: pointer; font-size: 0.9rem; color: #a0a0a0;">🇬🇧 UK</label>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" class="country-opt" id="countryCA" value="CA">
+          <label for="countryCA" style="cursor: pointer; font-size: 0.9rem; color: #a0a0a0;">🇨🇦 Canada</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
       <h3>Genres</h3>
       <div class="genre-list" id="genreFilters">
         <div class="genre-item active" data-id="">All Genres</div>
