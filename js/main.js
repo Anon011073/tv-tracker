@@ -1,18 +1,18 @@
-// Helper to get user-specific localStorage key
-function getUserKey(key) {
-  const userId = window.CURRENT_USER_ID || 'guest';
-  return `user_${userId}_${key}`;
-}
+/**
+ * js/main.js - Homepage Logic
+ */
 
-// Restored + Updated renderShows function
+let currentPage = 1;
+let currentGenre = '';
+let currentSort = 'first_air_date.desc'; // Default to newest aired
+
+// Restored + Updated renderShows function (horizontal sections)
 function renderShows(shows, containerId) {
   const container = document.getElementById(containerId);
   if (!container) return;
   container.innerHTML = '';
 
-  // Limit shows for performance (e.g., 20 per section)
-  const limit = 20;
-  shows.slice(0, limit).forEach(show => {
+  shows.slice(0, 20).forEach(show => {
     const div = document.createElement('div');
     div.className = 'card';
     div.innerHTML = `
@@ -26,180 +26,99 @@ function renderShows(shows, containerId) {
     container.appendChild(div);
   });
 
-  addScrollArrows(container);
-}
-
-function addScrollArrows(container) {
-  // Check if arrows already exist in parent
-  const parent = container.parentElement;
-  if (!parent.classList.contains('section-container')) {
-    // Wrap container if not already wrapped
-    const wrapper = document.createElement('div');
-    wrapper.className = 'section-container';
-    parent.insertBefore(wrapper, container);
-    wrapper.appendChild(container);
+  if (typeof addScrollArrows === 'function') {
+    addScrollArrows(container);
   }
-
-  const wrapper = container.parentElement;
-  if (wrapper.querySelector('.scroll-arrow')) return;
-
-  const leftArrow = document.createElement('button');
-  leftArrow.className = 'scroll-arrow arrow-left';
-  leftArrow.innerHTML = '❮';
-  leftArrow.onclick = () => container.scrollBy({ left: -400, behavior: 'smooth' });
-
-  const rightArrow = document.createElement('button');
-  rightArrow.className = 'scroll-arrow arrow-right';
-  rightArrow.innerHTML = '❯';
-  rightArrow.onclick = () => container.scrollBy({ left: 400, behavior: 'smooth' });
-
-  wrapper.appendChild(leftArrow);
-  wrapper.appendChild(rightArrow);
-
-  // Hide/show arrows based on scroll position
-  container.addEventListener('scroll', () => {
-    leftArrow.style.display = container.scrollLeft <= 0 ? 'none' : 'flex';
-    rightArrow.style.display = container.scrollLeft + container.clientWidth >= container.scrollWidth ? 'none' : 'flex';
-  });
-
-  // Initial check
-  setTimeout(() => {
-    leftArrow.style.display = container.scrollLeft <= 0 ? 'none' : 'flex';
-    rightArrow.style.display = container.scrollWidth > container.clientWidth ? 'flex' : 'none';
-  }, 500); // Give more time for content to render
-
-  enableDragToScroll(container);
 }
 
-function enableDragToScroll(slider) {
-  let isDown = false;
-  let startX;
-  let scrollLeft;
-  let isDragging = false;
-
-  slider.addEventListener('mousedown', (e) => {
-    isDown = true;
-    isDragging = false;
-    slider.classList.add('active');
-    // Use clientX and getBoundingClientRect for more reliable positioning
-    startX = e.clientX - slider.getBoundingClientRect().left;
-    scrollLeft = slider.scrollLeft;
-    slider.style.scrollBehavior = 'auto';
-  });
-
-  slider.addEventListener('mouseleave', () => {
-    isDown = false;
-    slider.classList.remove('active');
-    slider.style.scrollBehavior = 'smooth';
-  });
-
-  slider.addEventListener('mouseup', (e) => {
-    isDown = false;
-    slider.classList.remove('active');
-    slider.style.scrollBehavior = 'smooth';
-
-    const x = e.clientX - slider.getBoundingClientRect().left;
-    if (Math.abs(x - startX) > 5) {
-      isDragging = true;
-    }
-  });
-
-  slider.addEventListener('mousemove', (e) => {
-    if (!isDown) return;
-    e.preventDefault();
-    const x = e.clientX - slider.getBoundingClientRect().left;
-    const walk = (x - startX) * 2;
-    slider.scrollLeft = scrollLeft - walk;
-
-    if (Math.abs(x - startX) > 5) {
-      isDragging = true;
-    }
-  });
-
-  // Prevent clicks if we were dragging
-  slider.addEventListener('click', (e) => {
-    if (isDragging) {
-      e.stopImmediatePropagation();
-      e.preventDefault();
-      isDragging = false; // Reset for next interaction
-    }
-  }, true);
-}
-
-// Updated searchShows function in main.js (unified TV + Movie)
-
-// Utility to load shows from TMDB
-function loadShows(endpoint, containerId, limit = 16) {
-  fetch(`api/tmdb.php?endpoint=${endpoint}`)
-    .then(res => res.json())
-    .then(data => renderShows(data.results, containerId))
-    .catch(err => console.error('Error loading shows:', err));
-}
-
-// Load tracked shows from localStorage
-function loadTrackedShows() {
-  const tracked = JSON.parse(localStorage.getItem(getUserKey('favs')) || '[]');
-  const container = document.getElementById('trackedShows');
-  if (!container || !tracked.length) return;
+// Unified Grid Rendering
+function renderGrid(shows, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
   container.innerHTML = '';
 
-  // Limit to 50 tracked shows for performance
-  const limit = 50;
-  const promises = tracked.slice(0, limit).map(show =>
-    fetch(`api/tmdb.php?endpoint=/tv/${show.id}`).then(res => res.json())
-  );
-
-  Promise.all(promises).then(results => {
-    results.forEach(data => {
-      const div = document.createElement('div');
-      div.className = 'card';
-      div.innerHTML = `
-        <img src="https://image.tmdb.org/t/p/w200${data.poster_path}" alt="${data.name}" />
-        <h3>${data.name}</h3>
-        <p>⭐ ${data.vote_average}</p>
-      `;
-      div.addEventListener('click', () => {
-        window.location.href = `show.php?id=${data.id}`;
-      });
-      container.appendChild(div);
+  shows.forEach(show => {
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `
+      <img src="https://image.tmdb.org/t/p/w200${show.poster_path}" alt="${show.name}" onerror="this.src='https://placehold.co/200x300?text=No+Image'"/>
+      <h3>${show.name}</h3>
+      <p>⭐ ${show.vote_average}</p>
+    `;
+    div.addEventListener('click', () => {
+      window.location.href = `show.php?id=${show.id}`;
     });
-    addScrollArrows(container);
+    container.appendChild(div);
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  loadTrackedShows?.();
-  loadShows('/tv/popular', 'popular', 16);
-  loadShows('/tv/top_rated', 'topRated', 16);
-  loadShows('/trending/tv/day', 'trending', 16);
+function loadMainGrid(page = 1) {
+  currentPage = page;
+  let endpoint = `/discover/tv&page=${page}&sort_by=${currentSort}`;
 
-  const genreSelect = document.getElementById('genreSelect');
-  if (genreSelect) {
-    const savedGenre = localStorage.getItem(getUserKey('selectedGenre')) || '80';
-    genreSelect.value = savedGenre;
-    loadGenreShows(savedGenre);
-
-    genreSelect.addEventListener('change', () => {
-      const genreId = genreSelect.value;
-      localStorage.setItem(getUserKey('selectedGenre'), genreId);
-      loadGenreShows(genreId);
-    });
+  // Language filter
+  const englishOnly = document.getElementById('englishOnly');
+  if (englishOnly && englishOnly.checked) {
+      endpoint += '&with_original_language=en';
   }
-});
 
-function loadGenreShows(genreId) {
-  // Use & because endpoint is already a query param in the proxy URL
-  loadShows(`/discover/tv&with_genres=${genreId}`, 'genreSection');
+  // According to TMDB docs, you can sort discover by vote_average.desc,
+  // and filter by air_date or first_air_date.
+  // The user wants "newest aired tv episodes sorted by rating".
+  if (currentSort === 'first_air_date.desc') {
+      endpoint = `/discover/tv&page=${page}&sort_by=vote_average.desc&vote_count.gte=50&first_air_date.lte=${new Date().toISOString().split('T')[0]}`;
+  }
+
+  if (currentGenre) {
+    endpoint += `&with_genres=${currentGenre}`;
+  }
+
+  fetch(`api/tmdb.php?endpoint=${endpoint}`)
+    .then(res => res.json())
+    .then(data => {
+      renderGrid(data.results || [], 'mainGrid');
+      updatePagination(data.page, data.total_pages);
+
+      // Scroll back to top of grid
+      document.getElementById('mainContent').scrollIntoView({ behavior: 'smooth' });
+    })
+    .catch(err => console.error('Error loading main grid:', err));
+}
+
+function updatePagination(current, total) {
+    const info = document.getElementById('pageInfo');
+    if (info) info.textContent = `Page ${current} of ${total}`;
+
+    const prev = document.getElementById('prevPage');
+    const next = document.getElementById('nextPage');
+    if (prev) prev.disabled = current <= 1;
+    if (next) next.disabled = current >= total;
+
+    const numbers = document.getElementById('pageNumbers');
+    if (!numbers) return;
+    numbers.innerHTML = '';
+
+    // Show a range of pages (e.g., current - 2 to current + 2)
+    let start = Math.max(1, current - 2);
+    let end = Math.min(total, current + 2);
+
+    for (let i = start; i <= end; i++) {
+        const btn = document.createElement('button');
+        btn.className = `page-num ${i === current ? 'active' : ''}`;
+        btn.textContent = i;
+        btn.onclick = () => loadMainGrid(i);
+        numbers.appendChild(btn);
+    }
 }
 
 function searchShows() {
   const query = document.getElementById('searchInput').value.trim();
   const searchSection = document.getElementById('searchSection');
-  const movieSection = document.getElementById('movieSection');
+  const mainContent = document.getElementById('mainContent');
 
   if (!query) {
     searchSection.style.display = 'none';
-    if (movieSection) movieSection.style.display = 'none';
+    mainContent.style.display = 'block';
     return;
   }
 
@@ -207,23 +126,15 @@ function searchShows() {
     .then(res => res.json())
     .then(data => {
       searchSection.style.display = 'block';
+      mainContent.style.display = 'none';
       renderShows(data.results || [], 'searchResults');
     })
-    .catch(err => console.error('Search error (TV):', err));
-
-  fetch(`api/tmdb.php?endpoint=/search/movie&query=${encodeURIComponent(query)}`)
-    .then(res => res.json())
-    .then(data => {
-      if (data.results?.length) {
-        movieSection.style.display = 'block';
-        renderMovies(data.results || [], 'movieResults');
-      }
-    })
-    .catch(err => console.error('Search error (Movie):', err));
+    .catch(err => console.error('Search error:', err));
 }
 
 function renderMovies(movies, containerId) {
   const container = document.getElementById(containerId);
+  if (!container) return;
   container.innerHTML = '';
 
   movies.slice(0, 12).forEach(movie => {
@@ -239,32 +150,71 @@ function renderMovies(movies, containerId) {
     });
     container.appendChild(div);
   });
-  addScrollArrows(container);
+  if (typeof addScrollArrows === 'function') {
+    addScrollArrows(container);
+  }
 }
 
-async function watchMovie(tmdbId, title) {
-  const res = await fetch(`https://api.themoviedb.org/3/movie/${tmdbId}/external_ids?api_key=b6b677eb7d4ec17f700e3d4dfc31d005`);
-  const data = await res.json();
-  const imdbId = data.imdb_id;
-  if (!imdbId) return alert('No IMDb ID found.');
-
-  const watched = JSON.parse(localStorage.getItem(getUserKey('watchedMovies')) || '[]');
-  if (!watched.find(m => m.id === tmdbId)) {
-    watched.push({ id: tmdbId, title });
-    localStorage.setItem(getUserKey('watchedMovies'), JSON.stringify(watched));
+document.addEventListener('DOMContentLoaded', () => {
+  const mainGrid = document.getElementById('mainGrid');
+  if (mainGrid) {
+    loadMainGrid();
   }
 
-  window.open(`se_player.php?video_id=${imdbId}`, '_blank');
-}
+  const sortBy = document.getElementById('sortBy');
+  if (sortBy) {
+    sortBy.addEventListener('change', (e) => {
+      currentSort = e.target.value;
+      loadMainGrid(1);
+    });
+  }
 
-// Listen for input in search bar
-const searchInput = document.getElementById('searchInput');
-if (searchInput) {
-  searchInput.addEventListener('input', () => {
-    clearTimeout(window.searchTimeout);
-    window.searchTimeout = setTimeout(searchShows, 400);
+  const englishOnly = document.getElementById('englishOnly');
+  if (englishOnly) {
+      englishOnly.addEventListener('change', () => {
+          loadMainGrid(1);
+      });
+  }
+
+  const genreItems = document.querySelectorAll('.genre-item');
+  genreItems.forEach(item => {
+    item.addEventListener('click', () => {
+      genreItems.forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+      currentGenre = item.dataset.id;
+      loadMainGrid(1);
+
+      const gridTitle = document.getElementById('gridTitle');
+      if (gridTitle) {
+          gridTitle.textContent = currentGenre ? `${item.textContent} Shows` : 'Popular Shows';
+      }
+    });
   });
-}
+
+  const prevBtn = document.getElementById('prevPage');
+  const nextBtn = document.getElementById('nextPage');
+
+  if (prevBtn && mainGrid) {
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 1) loadMainGrid(currentPage - 1);
+    });
+  }
+
+  if (nextBtn && mainGrid) {
+    nextBtn.addEventListener('click', () => {
+      loadMainGrid(currentPage + 1);
+    });
+  }
+
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      clearTimeout(window.searchTimeout);
+      window.searchTimeout = setTimeout(searchShows, 400);
+    });
+  }
+});
+
 // Backup & Restore
 function exportData() {
   const data = {
@@ -290,12 +240,16 @@ function importData() {
 
   const reader = new FileReader();
   reader.onload = (e) => {
-    const data = JSON.parse(e.target.result);
-    Object.keys(data).forEach(key => {
-      localStorage.setItem(getUserKey(key), typeof data[key] === 'string' ? data[key] : JSON.stringify(data[key]));
-    });
-    alert('Data imported successfully! Reloading...');
-    location.reload();
+    try {
+      const data = JSON.parse(e.target.result);
+      Object.keys(data).forEach(key => {
+        localStorage.setItem(getUserKey(key), typeof data[key] === 'string' ? data[key] : JSON.stringify(data[key]));
+      });
+      alert('Data imported successfully! Reloading...');
+      location.reload();
+    } catch (err) {
+      alert('Invalid backup file.');
+    }
   };
   reader.readAsText(fileInput.files[0]);
 }

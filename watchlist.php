@@ -4,20 +4,33 @@
   <meta charset="UTF-8" />
   <title>Watchlist</title>
   <link rel="stylesheet" href="css/style.css" />
+  <script>
+    window.CURRENT_USER_ID = <?php echo json_encode($_SESSION['user_id']); ?>;
+  </script>
 </head>
 <body>
-<nav>
-  <button id="themeToggle" class="theme-toggle">🌙 Toggle Theme</button>
-  <a href="index.php">🏠 Home</a>
-  <a href="calendar.php">📅 Calendar</a>
-  <a href="favourites.php">⭐ Favourites</a>
-  <a href="watchlist.php">📋 Watchlist</a>
-    <a href="logout.php">🚪 Logout</a>
-</nav>
+  <nav class="top-nav">
+    <div class="nav-brand">
+      <h1>📺 TV Tracker</h1>
+    </div>
+    <div class="nav-links">
+      <a href="index.php">🏠 Home</a>
+      <a href="calendar.php">📅 Calendar</a>
+      <a href="favourites.php">⭐ Favourites</a>
+      <a href="watchlist.php" class="active">📋 Watchlist</a>
+      <a href="movies.php">🎬 Movies</a>
+      <a href="profile.php">👤 Profile</a>
+      <a href="logout.php">🚪 Logout</a>
+      <button id="themeToggle" class="theme-toggle">🌙 Toggle Theme</button>
+    </div>
+  </nav>
 
-  <h1>📋 Unwatched Episodes</h1>
-  <div id="watchList"></div>
+  <main class="content-area">
+    <h1>📋 Unwatched Episodes</h1>
+    <div id="watchList"></div>
+  </main>
 
+  <script src="js/utils.js"></script>
   <script src="js/theme.js"></script>
   <script>
     const favs = JSON.parse(localStorage.getItem(getUserKey('favs')) || '[]');

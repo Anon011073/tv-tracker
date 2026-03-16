@@ -5,6 +5,3 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 ?>
-<script>
-    window.CURRENT_USER_ID = <?php echo json_encode($_SESSION['user_id']); ?>;
-</script>

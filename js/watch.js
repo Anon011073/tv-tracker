@@ -1,12 +1,5 @@
 // File: js/watch.js
 
-// Helper to get user-specific localStorage key
-function getUserKey(key) {
-  const userId = window.CURRENT_USER_ID || 'guest';
-  return `user_${userId}_${key}`;
-}
-
-const TMDB_KEY = 'b6b677eb7d4ec17f700e3d4dfc31d005';
 const params = new URLSearchParams(window.location.search);
 const showId = params.get('id');
 const contentType = params.get('type') || 'tv'; // default to 'tv'
@@ -24,13 +17,13 @@ if (showId) {
 }
 
 async function loadMovie(id) {
-  const res = await fetch(`https://api.themoviedb.org/3/movie/${id}/external_ids?api_key=${TMDB_KEY}`);
+  const res = await fetch(`api/tmdb.php?endpoint=/movie/${id}/external_ids`);
   const data = await res.json();
   const imdbId = data.imdb_id;
 
   if (imdbId) {
     iframe.src = `se_player.php?video_id=${imdbId}`;
-    const details = await fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${TMDB_KEY}`);
+    const details = await fetch(`api/tmdb.php?endpoint=/movie/${id}`);
     const info = await details.json();
     movieTitle.textContent = info.title || 'Now Playing';
     episodeList.style.display = 'none';
@@ -42,10 +35,10 @@ async function loadMovie(id) {
 async function loadEpisodes(id) {
   const stored = JSON.parse(localStorage.getItem(getUserKey('resumeEpisodes')) || '{}');
   const last = stored[id];
-  const response = await fetch(`https://api.themoviedb.org/3/tv/${id}?api_key=${TMDB_KEY}`);
+  const response = await fetch(`api/tmdb.php?endpoint=/tv/${id}`);
   const show = await response.json();
 
-  const imdbIdRes = await fetch(`https://api.themoviedb.org/3/tv/${id}/external_ids?api_key=${TMDB_KEY}`);
+  const imdbIdRes = await fetch(`api/tmdb.php?endpoint=/tv/${id}/external_ids`);
   const imdbData = await imdbIdRes.json();
   const imdbId = imdbData.imdb_id;
 
@@ -54,7 +47,7 @@ async function loadEpisodes(id) {
 
   let firstLoaded = false;
   for (let season = 1; season <= show.number_of_seasons; season++) {
-    const seasonRes = await fetch(`https://api.themoviedb.org/3/tv/${id}/season/${season}?api_key=${TMDB_KEY}`);
+    const seasonRes = await fetch(`api/tmdb.php?endpoint=/tv/${id}/season/${season}`);
     const seasonData = await seasonRes.json();
 
     const seasonHeading = document.createElement('div');

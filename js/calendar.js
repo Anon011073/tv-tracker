@@ -1,9 +1,3 @@
-// Helper to get user-specific localStorage key
-function getUserKey(key) {
-  const userId = window.CURRENT_USER_ID || 'guest';
-  return `user_${userId}_${key}`;
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   loadCalendar();
 });

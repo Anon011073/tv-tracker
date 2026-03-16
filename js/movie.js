@@ -1,19 +1,12 @@
 // File: js/movie.js
 
-// Helper to get user-specific localStorage key
-function getUserKey(key) {
-  const userId = window.CURRENT_USER_ID || 'guest';
-  return `user_${userId}_${key}`;
-}
-
-const TMDB_KEY = 'b6b677eb7d4ec17f700e3d4dfc31d005';
 const params = new URLSearchParams(window.location.search);
 const movieId = params.get('id');
 
 if (movieId) fetchMovieDetails(movieId);
 
 function fetchMovieDetails(id) {
-  fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${TMDB_KEY}&language=en-US`)
+  fetch(`api/tmdb.php?endpoint=/movie/${id}`)
     .then(res => res.json())
     .then(renderMovieDetails);
 }
@@ -39,7 +32,7 @@ function renderMovieDetails(movie) {
 }
 
 async function watchMovie(tmdbId, title) {
-  const res = await fetch(`https://api.themoviedb.org/3/movie/${tmdbId}/external_ids?api_key=${TMDB_KEY}`);
+  const res = await fetch(`api/tmdb.php?endpoint=/movie/${tmdbId}/external_ids`);
   const data = await res.json();
   const imdbId = data.imdb_id;
   if (!imdbId) return alert('No IMDb ID found.');

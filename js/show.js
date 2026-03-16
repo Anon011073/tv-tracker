@@ -2,12 +2,6 @@
 const params = new URLSearchParams(window.location.search);
 const showId = params.get('id');
 
-// Helper to get user-specific localStorage key
-function getUserKey(key) {
-  const userId = window.CURRENT_USER_ID || 'guest';
-  return `user_${userId}_${key}`;
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   fetchShowDetails(showId);
 });

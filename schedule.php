@@ -5,22 +5,36 @@
   <meta charset="UTF-8" />
   <title>Upcoming Episodes</title>
   <link rel="stylesheet" href="css/style.css" />
+  <script>
+    window.CURRENT_USER_ID = <?php echo json_encode($_SESSION['user_id']); ?>;
+  </script>
 </head>
 <body>
-<nav>
-<button id="themeToggle" class="theme-toggle">🌙 Toggle Theme</button>
-  <a href="index.php">🏠 Home</a>
-  <a href="schedule.php">📅 Schedule</a>
-  <a href="favourites.php">⭐ Favourites</a>
-  <a href="watchlist.php">📋 Watchlist</a>
-    <a href="logout.php">🚪 Logout</a>
-</nav>
-  <h1>🗓️ Upcoming Episodes You're Not Caught Up On</h1>
+  <nav class="top-nav">
+    <div class="nav-brand">
+      <h1>📺 TV Tracker</h1>
+    </div>
+    <div class="nav-links">
+      <a href="index.php">🏠 Home</a>
+      <a href="calendar.php">📅 Calendar</a>
+      <a href="favourites.php">⭐ Favourites</a>
+      <a href="watchlist.php">📋 Watchlist</a>
+      <a href="movies.php">🎬 Movies</a>
+      <a href="profile.php">👤 Profile</a>
+      <a href="logout.php">🚪 Logout</a>
+      <button id="themeToggle" class="theme-toggle">🌙 Toggle Theme</button>
+    </div>
+  </nav>
+
+  <main class="content-area">
+    <h1>🗓️ Upcoming Episodes You're Not Caught Up On</h1>
   <div id="scheduleList"></div>
 
+  </main>
+  <script src="js/utils.js"></script>
   <script>
-    const favs = JSON.parse(localStorage.getItem('favs') || '[]');
-    const caughtUp = JSON.parse(localStorage.getItem('caughtUp') || '{}');
+    const favs = JSON.parse(localStorage.getItem(getUserKey('favs')) || '[]');
+    const caughtUp = JSON.parse(localStorage.getItem(getUserKey('caughtUp')) || '{}');
     const container = document.getElementById('scheduleList');
 
     favs.forEach(fav => {
