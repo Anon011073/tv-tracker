@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function loadCalendar() {
-  const favs = JSON.parse(localStorage.getItem('favs') || '[]');
+  const favs = JSON.parse(localStorage.getItem(getUserKey('favs')) || '[]');
   const container = document.getElementById('calendarContainer');
   container.innerHTML = '<p>📡 Loading upcoming episodes...</p>';
 
@@ -77,7 +77,7 @@ function renderCalendar(episodes) {
     eps.forEach(ep => {
       inner += `
         <div class="ep-tile">
-          <a href="show.html?id=${ep.showId}">
+          <a href="show.php?id=${ep.showId}">
             ${ep.name}<br><small>${ep.episode}</small>
           </a>
         </div>

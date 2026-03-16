@@ -1,13 +1,12 @@
 // File: js/movie.js
 
-const TMDB_KEY = 'b6b677eb7d4ec17f700e3d4dfc31d005';
 const params = new URLSearchParams(window.location.search);
 const movieId = params.get('id');
 
 if (movieId) fetchMovieDetails(movieId);
 
 function fetchMovieDetails(id) {
-  fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${TMDB_KEY}&language=en-US`)
+  fetch(`api/tmdb.php?endpoint=/movie/${id}`)
     .then(res => res.json())
     .then(renderMovieDetails);
 }
@@ -33,29 +32,17 @@ function renderMovieDetails(movie) {
 }
 
 async function watchMovie(tmdbId, title) {
-  const res = await fetch(`https://api.themoviedb.org/3/movie/${tmdbId}/external_ids?api_key=${TMDB_KEY}`);
+  const res = await fetch(`api/tmdb.php?endpoint=/movie/${tmdbId}/external_ids`);
   const data = await res.json();
   const imdbId = data.imdb_id;
   if (!imdbId) return alert('No IMDb ID found.');
 
-  const watched = JSON.parse(localStorage.getItem('watchedMovies') || '[]');
+  const watched = JSON.parse(localStorage.getItem(getUserKey('watchedMovies')) || '[]');
   if (!watched.find(m => m.id === tmdbId)) {
     watched.push({ id: tmdbId, title });
-    localStorage.setItem('watchedMovies', JSON.stringify(watched));
+    localStorage.setItem(getUserKey('watchedMovies'), JSON.stringify(watched));
   }
 
-  window.location.href = `watch.html?id=${tmdbId}&type=movie`;
+  window.location.href = `watch.php?id=${tmdbId}&type=movie`;
 }
 
-// Theme toggle
-const toggleBtn = document.getElementById('themeToggle');
-const savedTheme = localStorage.getItem('theme') || 'dark';
-document.body.classList.add(savedTheme + '-mode');
-if (toggleBtn) {
-  toggleBtn.addEventListener('click', () => {
-    const isDark = document.body.classList.contains('dark-mode');
-    document.body.classList.remove(isDark ? 'dark-mode' : 'light-mode');
-    document.body.classList.add(isDark ? 'light-mode' : 'dark-mode');
-    localStorage.setItem('theme', isDark ? 'light' : 'dark');
-  });
-}

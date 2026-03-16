@@ -4,23 +4,7 @@ const showId = params.get('id');
 
 document.addEventListener('DOMContentLoaded', () => {
   fetchShowDetails(showId);
-  setupTheme();
 });
-
-function setupTheme() {
-  const toggleBtn = document.getElementById('themeToggle');
-  const savedTheme = localStorage.getItem('theme') || 'dark';
-  document.body.classList.add(savedTheme + '-mode');
-
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      const isDark = document.body.classList.contains('dark-mode');
-      document.body.classList.remove(isDark ? 'dark-mode' : 'light-mode');
-      document.body.classList.add(isDark ? 'light-mode' : 'dark-mode');
-      localStorage.setItem('theme', isDark ? 'light' : 'dark');
-    });
-  }
-}
 
 function fetchShowDetails(id) {
   fetch(`api/tmdb.php?endpoint=/tv/${id}`)
@@ -50,7 +34,7 @@ function renderShowDetails(show) {
           <button id="favBtn" class="btn">❤️ Loading...</button>
           <button id="caughtUpBtn" class="btn btn-secondary">✅ Mark as Caught Up</button>
           <button id="resetBtn" class="btn btn-danger">🗑️ Reset Progress</button>
-          <a class="btn btn-primary" href="watch.html?id=${show.id}" target="_blank">▶️ Watch Now</a>
+          <a class="btn btn-primary" href="watch.php?id=${show.id}" target="_blank">▶️ Watch Now</a>
         </div>
         <p><em>Last watched air date: ${caughtUpDate}</em></p>
       </div>
@@ -63,7 +47,7 @@ function renderShowDetails(show) {
   `;
 
   const favBtn = document.getElementById('favBtn');
-  const isFav = (JSON.parse(localStorage.getItem('favs') || '[]')).some(f => f.id === show.id);
+  const isFav = (JSON.parse(localStorage.getItem(getUserKey('favs')) || '[]')).some(f => f.id === show.id);
   favBtn.textContent = isFav ? '❌ Remove from Favourites' : '❤️ Add to Favourites';
   favBtn.addEventListener('click', () => toggleFavourite(show.id, show.name));
   document.getElementById('caughtUpBtn').addEventListener('click', () => markCaughtUp(show.id));
@@ -115,7 +99,7 @@ function loadRecommendations(id) {
         recDiv.innerHTML = '<h3>🔁 Recommendations</h3>' +
           '<div class="recommendation-grid">' +
           data.results.slice(0, 6).map(show => `
-            <div class="rec-card" onclick="window.location.href='show.html?id=${show.id}'">
+            <div class="rec-card" onclick="window.location.href='show.php?id=${show.id}'">
               <img src="https://image.tmdb.org/t/p/w154${show.poster_path}" alt="${show.name}" />
               <h4>${show.name}</h4>
             </div>
@@ -151,7 +135,7 @@ function renderEpisodes(showId, seasonNumber, episodes) {
 }
 
 function toggleFavourite(id, name) {
-  let favs = JSON.parse(localStorage.getItem('favs') || '[]');
+  let favs = JSON.parse(localStorage.getItem(getUserKey('favs')) || '[]');
   const isFav = favs.some(s => s.id === id);
   const btn = document.getElementById('favBtn');
 
@@ -165,7 +149,7 @@ function toggleFavourite(id, name) {
     if (btn) btn.textContent = '❌ Remove from Favourites';
   }
 
-  localStorage.setItem('favs', JSON.stringify(favs));
+  localStorage.setItem(getUserKey('favs'), JSON.stringify(favs));
 }
 
 function markCaughtUp(showId) {
@@ -183,7 +167,7 @@ function markCaughtUp(showId) {
       }
 
       Promise.all(promises).then(seasons => {
-        const all = JSON.parse(localStorage.getItem('watchProgress') || '{}');
+        const all = JSON.parse(localStorage.getItem(getUserKey('watchProgress')) || '{}');
         all[showId] = all[showId] || {};
 
         seasons.forEach(season => {
@@ -191,11 +175,11 @@ function markCaughtUp(showId) {
           all[showId][seasonNum] = season.episodes.map(() => true);
         });
 
-        localStorage.setItem('watchProgress', JSON.stringify(all));
+        localStorage.setItem(getUserKey('watchProgress'), JSON.stringify(all));
 
-        const caughtUp = JSON.parse(localStorage.getItem('caughtUp') || '{}');
+        const caughtUp = JSON.parse(localStorage.getItem(getUserKey('caughtUp')) || '{}');
         caughtUp[showId] = latestDate;
-        localStorage.setItem('caughtUp', JSON.stringify(caughtUp));
+        localStorage.setItem(getUserKey('caughtUp'), JSON.stringify(caughtUp));
 
         alert(`Marked all episodes watched and caught up to ${latestDate}`);
         location.reload();
@@ -204,52 +188,37 @@ function markCaughtUp(showId) {
 }
 
 function resetProgress(showId) {
-  const all = JSON.parse(localStorage.getItem('watchProgress') || '{}');
+  const all = JSON.parse(localStorage.getItem(getUserKey('watchProgress')) || '{}');
   delete all[showId];
-  localStorage.setItem('watchProgress', JSON.stringify(all));
+  localStorage.setItem(getUserKey('watchProgress'), JSON.stringify(all));
 
-  const caughtUp = JSON.parse(localStorage.getItem('caughtUp') || '{}');
+  const caughtUp = JSON.parse(localStorage.getItem(getUserKey('caughtUp')) || '{}');
   delete caughtUp[showId];
-  localStorage.setItem('caughtUp', JSON.stringify(caughtUp));
+  localStorage.setItem(getUserKey('caughtUp'), JSON.stringify(caughtUp));
 
   alert('Watch progress has been reset for this show.');
   location.reload();
 }
 
 function getCaughtUp(showId) {
-  const all = JSON.parse(localStorage.getItem('caughtUp') || '{}');
+  const all = JSON.parse(localStorage.getItem(getUserKey('caughtUp')) || '{}');
   return all[showId];
 }
 
 function getWatchProgress(showId) {
-  const all = JSON.parse(localStorage.getItem('watchProgress') || '{}');
+  const all = JSON.parse(localStorage.getItem(getUserKey('watchProgress')) || '{}');
   return all[showId] || {};
 }
 
 function markEpisode(showId, season, index, checked) {
-  const all = JSON.parse(localStorage.getItem('watchProgress') || '{}');
+  const all = JSON.parse(localStorage.getItem(getUserKey('watchProgress')) || '{}');
   all[showId] = all[showId] || {};
   all[showId][season] = all[showId][season] || [];
   all[showId][season][index] = checked;
-  localStorage.setItem('watchProgress', JSON.stringify(all));
+  localStorage.setItem(getUserKey('watchProgress'), JSON.stringify(all));
 }
 
 function toggleSeason(id) {
   const el = document.getElementById(id);
   el.style.display = el.style.display === 'block' ? 'none' : 'block';
-}
-
-function setupTheme() {
-  const toggleBtn = document.getElementById('themeToggle');
-  const savedTheme = localStorage.getItem('theme') || 'dark';
-  document.body.classList.add(savedTheme + '-mode');
-
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      const isDark = document.body.classList.contains('dark-mode');
-      document.body.classList.remove(isDark ? 'dark-mode' : 'light-mode');
-      document.body.classList.add(isDark ? 'light-mode' : 'dark-mode');
-      localStorage.setItem('theme', isDark ? 'light' : 'dark');
-    });
-  }
 }
