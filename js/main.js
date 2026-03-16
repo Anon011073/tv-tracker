@@ -52,21 +52,25 @@ function renderGrid(shows, containerId) {
   });
 }
 
-function loadMainGrid(page = 1) {
+function loadMainGrid(page = 1, shouldScroll = true) {
   currentPage = page;
-  let endpoint = `/discover/tv&page=${page}&sort_by=${currentSort}`;
+  let endpoint = `/discover/tv&page=${page}`;
+
+  // Base sort
+  let sortParam = currentSort;
+
+  // Specialized "Newest Aired sorted by Rating"
+  if (currentSort === 'first_air_date.desc') {
+      sortParam = 'vote_average.desc';
+      endpoint += `&vote_count.gte=50&first_air_date.lte=${new Date().toISOString().split('T')[0]}`;
+  }
+
+  endpoint += `&sort_by=${sortParam}`;
 
   // Language filter
   const englishOnly = document.getElementById('englishOnly');
   if (englishOnly && englishOnly.checked) {
       endpoint += '&with_original_language=en';
-  }
-
-  // According to TMDB docs, you can sort discover by vote_average.desc,
-  // and filter by air_date or first_air_date.
-  // The user wants "newest aired tv episodes sorted by rating".
-  if (currentSort === 'first_air_date.desc') {
-      endpoint = `/discover/tv&page=${page}&sort_by=vote_average.desc&vote_count.gte=50&first_air_date.lte=${new Date().toISOString().split('T')[0]}`;
   }
 
   if (currentGenre) {
@@ -79,8 +83,10 @@ function loadMainGrid(page = 1) {
       renderGrid(data.results || [], 'mainGrid');
       updatePagination(data.page, data.total_pages);
 
-      // Scroll back to top of grid
-      document.getElementById('mainContent').scrollIntoView({ behavior: 'smooth' });
+      // Scroll back to top of grid only if requested (not on initial load)
+      if (shouldScroll) {
+          document.getElementById('mainContent').scrollIntoView({ behavior: 'smooth' });
+      }
     })
     .catch(err => console.error('Error loading main grid:', err));
 }
@@ -158,7 +164,7 @@ function renderMovies(movies, containerId) {
 document.addEventListener('DOMContentLoaded', () => {
   const mainGrid = document.getElementById('mainGrid');
   if (mainGrid) {
-    loadMainGrid();
+    loadMainGrid(1, false);
   }
 
   const sortBy = document.getElementById('sortBy');

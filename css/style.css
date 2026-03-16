@@ -65,10 +65,6 @@ body {
   display: flex;
   flex-direction: column;
   border-right: 1px solid #2d3843;
-  position: sticky;
-  top: 65px; /* Height of top nav */
-  height: calc(100vh - 65px);
-  overflow-y: auto;
   box-sizing: border-box;
 }
 
@@ -141,15 +137,26 @@ body {
 .content-header {
   margin-bottom: 40px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
 #searchInput {
   width: 100%;
   max-width: 500px;
-  margin: 0;
+  padding: 15px 20px;
+  font-size: 1.1rem;
   background: #1c252e;
   border: 1px solid #2d3843;
+  border-radius: 8px;
+  color: #fff;
+  outline: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+#searchInput:focus {
+  border-color: #ff5e57;
 }
 
 /* Grid & Cards */
@@ -226,28 +233,6 @@ body {
   color: #888;
 }
 
-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-input[type="text"] {
-  padding: 0.5rem;
-  width: 60%;
-  max-width: 500px;
-}
-#searchInput {
-    margin: 20px;
-    padding: 15px 20px;
-    width: 80%;
-    max-width: 500px;
-    font-size: 1.2rem;
-    border: none;
-    border-radius: 8px;
-    background-color: #1c252e;
-    color: white;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5);
-    outline: none;
-}
 /* genre select */
 #genreSelect {
   margin: 20px;
